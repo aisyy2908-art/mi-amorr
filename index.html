@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>With All My Love — Romantic Scrapbook Flipbook</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Dancing+Script:wght@500;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --burgundy-dark: #450d15;
+            --burgundy-main: #5c131d;
+            --burgundy-light: #7c1f2c;
+            --blush-pink: #fce7ec;
+            --paper-cream: #fffdfb;
+            --ink-dark: #2c1e20;
+            --gold-accent: #d4af37;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #331419 0%, #16070a 100%);
+            color: var(--ink-dark);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        .font-script { font-family: 'Great Vibes', 'Dancing Script', cursive; }
+        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-alex { font-family: 'Alex Brush', cursive; }
+        .font-serif-display { font-family: 'Playfair Display', serif; }
+        .font-cormorant { font-family: 'Cormorant Garamond', serif; }
+
+        /* Tekstur Sampul & Kertas */
+        .bg-maroon-cover {
+            background-color: var(--burgundy-main);
+            background-image: 
+                radial-gradient(rgba(255,255,255,0.05) 1px, transparent 0),
+                linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(0,0,0,0.3) 100%);
+            background-size: 14px 14px, 100% 100%;
+        }
+
+        .bg-maroon-gingham {
+            background-color: #6b1622;
+            background-image:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 50%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.08) 50%, transparent 50%);
+            background-size: 22px 22px;
+        }
+
+        .bg-cream-paper {
+            background-color: var(--paper-cream);
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.03) 0%, transparent 4%, transparent 96%, rgba(0,0,0,0.04) 100%),
+                radial-gradient(#ead9dc 0.65px, transparent 0.65px);
+            background-size: 100% 100%, 16px 16px;
+        }
+
+        .bg-grid-paper {
+            background-color: var(--paper-cream);
+            background-image: 
+                linear-gradient(to right, rgba(92, 19, 29, 0.09) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(92, 19, 29, 0.09) 1px, transparent 1px);
+            background-size: 15px 15px;
+        }
+
+        .bg-lined-paper {
+            background-color: #fffdfa;
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 21px,
+                rgba(92, 19, 29, 0.14) 22px
+            );
+            line-height: 22px;
+        }
+
+        /* Efek Polaroid & Washi Tape */
+        .polaroid {
+            background: #ffffff;
+            padding: 5px 5px 14px 5px;
+            box-shadow: 0 5px 14px rgba(0,0,0,0.22);
+            border-radius: 3px;
+            transition: transform 0.25s ease;
+        }
+        .polaroid:hover {
+            transform: scale(1.04) rotate(0deg) !important;
+            z-index: 20;
+        }
+
+        .washi-tape {
+            position: absolute;
+            height: 13px;
+            width: 44px;
+            background: rgba(184, 65, 84, 0.55);
+            backdrop-filter: blur(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            z-index: 12;
+        }
+
+        /* Animasi Piringan Hitam */
+        @keyframes spinVinyl {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .vinyl-spinning {
+            animation: spinVinyl 5.2s linear infinite;
+        }
+
+        /* =========================================
+           FLIPBOOK 3D ENGINE & SPIRAL NOTEBOOK
+           ========================================= */
+        .book-viewport {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 2200px;
+            padding: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+
+        .page-sheet {
+            width: var(--page-w, 330px);
+            height: var(--page-h, 475px);
+            position: relative;
+            border-radius: 6px 14px 14px 6px;
+            box-shadow: 
+                0 16px 36px rgba(0,0,0,0.48),
+                inset 0 0 0 1px rgba(255,255,255,0.15);
+            overflow: hidden;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            transition: transform 0.55s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .page-left {
+            border-radius: 14px 4px 4px 14px;
+            box-shadow: 
+                -10px 15px 30px rgba(0,0,0,0.42),
+                inset -12px 0 20px -10px rgba(0,0,0,0.16);
+        }
+
+        .page-right {
+            border-radius: 4px 14px 14px 4px;
+            box-shadow: 
+                10px 15px 30px rgba(0,0,0,0.42),
+                inset 12px 0 20px -10px rgba(0,0,0,0.16);
+        }
+
+        .flip-anim-next {
+            animation: flipPageNext 0.48s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+        .flip-anim-prev {
+            animation: flipPagePrev 0.48s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        @keyframes flipPageNext {
+            0% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
+            45% { transform: rotateY(-15deg) scale(0.985); filter: brightness(0.92); }
+            100% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
+        }
+
+        @keyframes flipPagePrev {
+            0% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
+            45% { transform: rotateY(15deg) scale(0.985); filter: brightness(0.92); }
+            100% { transform: rotateY(0deg) scale(1); filter: brightness(1); }
+        }
+
+        /* Spiral Kawat Metalik */
+        .spiral-binder {
+            position: absolute;
+            top: 14px;
+            bottom: 14px;
+            width: 24px;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            pointer-events: none;
+        }
+
+        .spiral-ring {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(180deg, #444 0%, #f5f5f5 35%, #888 70%, #222 100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .spiral-ring::before, .spiral-ring::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            width: 5px;
+            height: 8px;
+            background: #1a0609;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        .spiral-ring::before { left: -2px; }
+        .spiral-ring::after { right: -2px; }
+
+        /* Tab Pembatas Bab di Sisi Kanan */
+        .side-tabs {
+            position: absolute;
+            right: -19px;
+            top: 18px;
+            bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 5;
+        }
+
+        .side-tab-item {
+            width: 20px;
+            height: 30px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.35);
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7.5px;
+            color: white;
+            font-weight: 700;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 0.4px;
+        }
+        .side-tab-item:hover {
+            transform: translateX(4px);
+        }
+
+        .page-corner-hint {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.08) 52%, rgba(255,255,255,0.65) 65%, rgba(0,0,0,0.2) 100%);
+            border-top-left-radius: 8px;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #fce7ec; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #7c1f2c; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER BAR MINIMALIS -->
+    <header class="w-full px-3 sm:px-5 py-2 flex items-center justify-between bg-black/40 backdrop-blur-md border-b border-white/10 z-50 shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+            <div id="secretHeartTrigger" onclick="handleSecretHeartTap()" title="With All My Love" class="w-8 h-8 rounded-lg bg-[#5c131d] border border-rose-300/30 flex items-center justify-center text-rose-100 shadow shrink-0 cursor-pointer active:scale-90 transition">
+                <i class="fa-solid fa-heart text-xs"></i>
+            </div>
+            <div class="truncate">
+                <h1 id="headerBookTitle" class="text-white text-xs sm:text-base font-serif-display font-semibold tracking-wide truncate">
+                    With All My Love
+                </h1>
+                <p id="headerDaysBadge" class="text-[10px] text-rose-200/85 truncate">
+                    Menghitung hari bersama...
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <!-- Mini Music Player Pill -->
+            <button id="miniPlayerBtn" onclick="toggleVinylMusic(event)" title="Putar / Jeda Lagu" class="px-2.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-rose-100 text-[11px] font-medium flex items-center gap-1.5 border border-white/15 transition cursor-pointer">
+                <i id="miniPlayIcon" class="fa-solid fa-play text-[10px] text-rose-300"></i>
+                <span id="miniSongLabel" class="max-w-[72px] sm:max-w-[115px] truncate">About You</span>
+            </button>
+
+            <!-- Tombol Edit Foto & Teks (HANYA MUNCUL JIKA PEMBUAT SUDAH LOGIN PIN) -->
+            <button id="btnCreatorEdit" onclick="openEditModal()" class="hidden px-3 py-1.5 rounded-full bg-rose-700 hover:bg-rose-600 active:scale-95 text-white text-xs sm:text-sm font-semibold items-center gap-1 shadow-lg shadow-rose-950/60 transition cursor-pointer border border-rose-300/30">
+                <span>✏️ Edit & Foto</span>
+            </button>
+
+            <!-- Tombol Kunci Tampilan Sekarang -->
+            <button id="btnCreatorLockNow" onclick="lockCreatorMode()" title="Kunci Kembali Tampilan" class="hidden px-2.5 py-1.5 rounded-full bg-amber-600/90 hover:bg-amber-500 active:scale-95 text-white text-xs font-semibold items-center gap-1 shadow transition cursor-pointer border border-amber-200/30">
+                <i class="fa-solid fa-lock text-[10px]"></i>
+                <span class="hidden sm:inline">Kunci</span>
+            </button>
+
+            <!-- Tombol Mute/Unmute -->
+            <button id="btnMute" onclick="toggleSound()" title="Suara Efek Halaman" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                <i id="iconMute" class="fa-solid fa-volume-high text-xs"></i>
+            </button>
+
+            <!-- Tombol Fullscreen -->
+            <button onclick="toggleFullscreen()" title="Layar Penuh" class="hidden sm:flex w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center transition cursor-pointer">
+                <i id="iconFullscreen" class="fa-solid fa-expand text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- AREA UTAMA FLIPBOOK -->
+    <main id="bookViewport" class="book-viewport">
+        <!-- Panah Kiri (Desktop/Tablet) -->
+        <button id="btnPrevSide" onclick="prevPage()" aria-label="Halaman Sebelumnya"
+            class="hidden md:flex absolute left-4 lg:left-8 z-40 w-11 h-11 rounded-full bg-white/10 hover:bg-rose-800/85 text-white border border-white/20 items-center justify-center backdrop-blur-md shadow-xl transition active:scale-90 cursor-pointer disabled:opacity-25 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Panggung Buku 3D -->
+        <div id="bookStage" class="book-stage"></div>
+
+        <!-- Panah Kanan (Desktop/Tablet) -->
+        <button id="btnNextSide" onclick="nextPage()" aria-label="Halaman Berikutnya"
+            class="hidden md:flex absolute right-4 lg:right-8 z-40 w-11 h-11 rounded-full bg-white/10 hover:bg-rose-800/85 text-white border border-white/20 items-center justify-center backdrop-blur-md shadow-xl transition active:scale-90 cursor-pointer disabled:opacity-25 disabled:pointer-events-none">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </main>
+
+    <!-- FOOTER KONTROL NAVIGASI -->
+    <footer class="w-full px-3 sm:px-5 py-2 bg-black/45 backdrop-blur-md border-t border-white/10 flex items-center justify-between sm:justify-center gap-2 sm:gap-5 z-50 shrink-0">
+        <button onclick="goToPage(1)" title="Ke Sampul Depan" class="p-2 rounded-lg text-rose-200/80 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i class="fa-solid fa-backward-step text-xs sm:text-sm"></i>
+        </button>
+
+        <button id="btnPrevBottom" onclick="prevPage()" class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 transition cursor-pointer disabled:opacity-30">
+            <i class="fa-solid fa-chevron-left text-[11px]"></i>
+            <span>Prev</span>
+        </button>
+
+        <div class="flex flex-col items-center min-w-[115px] sm:min-w-[190px]">
+            <span id="pageIndicator" class="text-white text-xs sm:text-sm font-semibold tracking-wide">Page 1 / 18</span>
+            <input id="pageSlider" type="range" min="1" max="18" value="1" oninput="goToPage(parseInt(this.value))"
+                class="w-full h-1.5 mt-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-rose-500">
+        </div>
+
+        <button id="btnNextBottom" onclick="nextPage()" class="px-3.5 py-1.5 rounded-full bg-rose-700 hover:bg-rose-600 active:scale-95 text-white text-xs sm:text-sm font-medium flex items-center gap-1.5 transition cursor-pointer disabled:opacity-30">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-[11px]"></i>
+        </button>
+
+        <button onclick="goToPage(18)" title="Ke Sampul Belakang" class="p-2 rounded-lg text-rose-200/80 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i class="fa-solid fa-forward-step text-xs sm:text-sm"></i>
+        </button>
+    </footer>
+
+    <!-- =====================================================================
+         MODAL KUSTOMISASI ("✏️ Edit & Foto")
+         ===================================================================== -->
+    <div id="editModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-[100] hidden items-center justify-center p-3 sm:p-5">
+        <div class="bg-[#fffdfb] text-[#2c1e20] w-full max-w-2xl max-h-[90dvh] rounded-2xl shadow-2xl border border-rose-900/20 flex flex-col overflow-hidden">
+            <!-- Header Modal -->
+            <div class="px-5 py-3 bg-[#5c131d] text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-rose-300"></i>
+                    <h2 class="font-serif-display text-base sm:text-lg font-bold">Edit Scrapbook Kenangan</h2>
+                </div>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Tab Navigasi Modal -->
+            <div class="flex overflow-x-auto border-b border-rose-900/15 bg-[#fce7ec]/55 px-3 pt-2 gap-1.5 shrink-0 text-xs font-semibold">
+                <button id="tabBtnGeneral" onclick="switchEditTab('general')" class="px-3.5 py-2 rounded-t-lg bg-[#5c131d] text-white transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-calendar-heart mr-1"></i> Tanggal & Surat
+                </button>
+                <button id="tabBtnPhotos" onclick="switchEditTab('photos')" class="px-3.5 py-2 rounded-t-lg bg-white/70 text-[#5c131d] hover:bg-white transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-images mr-1"></i> 14 Foto & Bingkai
+                </button>
+                <button id="tabBtnSongs" onclick="switchEditTab('songs')" class="px-3.5 py-2 rounded-t-lg bg-white/70 text-[#5c131d] hover:bg-white transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-music mr-1"></i> 3 Lagu Playlist
+                </button>
+                <button id="tabBtnSecurity" onclick="switchEditTab('security')" class="px-3.5 py-2 rounded-t-lg bg-white/70 text-[#5c131d] hover:bg-white transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Kunci & Kirim
+                </button>
+            </div>
+
+            <!-- Isi Modal -->
+            <div class="p-4 sm:p-5 overflow-y-auto custom-scroll space-y-4 text-sm flex-1">
+                <!-- TAB 1: TANGGAL & TEKS -->
+                <div id="tabPanelGeneral" class="space-y-4">
+                    <div class="p-3 rounded-xl bg-[#fce7ec] border border-rose-300 text-rose-950 text-xs flex items-start gap-2.5">
+                        <i class="fa-solid fa-clock mt-0.5 text-[#5c131d]"></i>
+                        <div>
+                            <p class="font-semibold">Penghitung Hari Otomatis Aktif!</p>
+                            <p class="mt-0.5">Pilih <b>Tanggal Jadian</b> di bawah, maka jumlah hari, bulan, tahun, dan detik kebersamaan akan dihitung otomatis hingga hari ini saat web dibuka.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-semibold text-[11px] uppercase tracking-wider text-[#5c131d] mb-1">Tanggal Jadian (Start Date)</label>
+                            <input id="inpAnniversaryDate" type="date" onchange="previewAnniversaryStats()" class="w-full px-3 py-2 rounded-lg border border-rose-900/25 bg-white focus:outline-none focus:border-[#5c131d]">
+                            <p id="anniversaryPreviewText" class="text-[11px] text-rose-800 font-medium mt-1"></p>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-[11px] uppercase tracking-wider text-[#5c131d] mb-1">Nama Pasangan</label>
+                            <input id="inpCoupleName" type="text" class="w-full px-3 py-2 rounded-lg border border-rose-900/25 bg-white focus:outline-none focus:border-[#5c131d]" placeholder="My Favorite Person">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-semibold text-[11px] uppercase tracking-wider text-[#5c131d] mb-1">Judul Sampul Depan</label>
+                            <input id="inpCoverTitle" type="text" class="w-full px-3 py-2 rounded-lg border border-rose-900/25 bg-white focus:outline-none focus:border-[#5c131d]" placeholder="With all my Love">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-[11px] uppercase tracking-wider text-[#5c131d] mb-1">Judul & Isi Surat Cinta (Halaman 8)</label>
+                        <input id="inpLetterTitle" type="text" class="w-full px-3 py-2 rounded-lg border border-rose-900/25 bg-white mb-2 focus:outline-none focus:border-[#5c131d]" placeholder="Happy Anniversary">
+                        <textarea id="inpLetterBody" rows="4" class="w-full px-3 py-2 rounded-lg border border-rose-900/25 bg-white focus:outline-none focus:border-[#5c131d]" placeholder="Tulis pesan cintamu..."></textarea>
+                    </div>
+                </div>
+
+                <!-- TAB 2: 14 FOTO KENANGAN & PENYESUAIAN BINGKAI -->
+                <div id="tabPanelPhotos" class="hidden space-y-3">
+                    <p class="text-xs text-stone-600">
+                        Ketuk <b>Ganti</b> untuk mengunggah gambar, atau tekan <b><i class="fa-solid fa-crop-simple"></i> Atur Bingkai</b> untuk mengecilkan / memperbesar ukuran dan menggeser posisi foto di dalam bingkai.
+                    </p>
+                    <div id="photoSlotsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                </div>
+
+                <!-- TAB 3: 3 LAGU PLAYLIST -->
+                <div id="tabPanelSongs" class="hidden space-y-4">
+                    <p class="text-xs text-stone-600">Atur 3 lagu favorit kalian! Secara bawaan tersedia 3 melodi instrumental romantis yang berbeda, atau kamu bisa memilih file MP3/M4A sendiri untuk masing-masing lagu.</p>
+                    <div id="songSlotsContainer" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB 4: KUNCI PEMBUAT & UNDUH HTML SIAP KIRIM -->
+                <div id="tabPanelSecurity" class="hidden space-y-4">
+                    <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1.5">
+                        <p class="font-bold flex items-center gap-1.5 text-sm text-[#5c131d]">
+                            <i class="fa-solid fa-lock"></i> Proteksi Khusus Pembuat (Read-Only untuk Penerima)
+                        </p>
+                        <p>Saat kamu mengunduh file HTML melalui tombol di bawah, seluruh foto, posisi bingkai, surat cinta, tanggal jadian, dan lagu akan <b>tertanam permanen</b> dan <b>terkunci rapat</b>.</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-[#5c131d] text-white space-y-2.5 shadow-lg">
+                        <p class="font-serif-display font-bold text-base">Bagikan ke Pasangan (Terkunci Permanen)</p>
+                        <p class="text-[11px] text-rose-100/85">Menghasilkan file <b>scrapbook-kita.html</b> siap kirim lewat WhatsApp, Google Drive, atau di-hosting online.</p>
+                        <button onclick="exportLockedHTML()" class="w-full py-2.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-98 text-[#2c1e20] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition cursor-pointer">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>🔒 Kunci & Unduh File HTML Siap Kirim</span>
+                        </button>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-rose-50/80 border border-rose-900/15 space-y-2.5">
+                        <label class="block font-bold text-xs text-[#5c131d]">Ganti PIN Rahasia Pembuat (4–6 Angka)</label>
+                        <div class="flex gap-2">
+                            <input id="inpNewCreatorPin" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]*"
+                                class="flex-1 px-3 py-2 rounded-lg border border-rose-900/25 bg-white text-xs tracking-widest focus:outline-none focus:border-[#5c131d]"
+                                placeholder="Masukkan PIN baru (4-6 digit)">
+                            <button onclick="updateCreatorPin()" class="px-4 py-2 rounded-lg bg-[#5c131d] hover:bg-[#7c1f2c] text-white text-xs font-semibold transition cursor-pointer shrink-0">
+                                Simpan PIN
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-stone-500">Cara membuka kembali menu Edit saat terkunci: <b>Tap 5x ikon hati di kiri atas</b> atau <b>tahan teks "FOR YOU" di sampul depan selama 2.5 detik</b>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="px-4 sm:px-5 py-3 bg-[#fce7ec]/60 border-t border-rose-900/15 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <button onclick="resetToDefault()" class="px-3 py-2 rounded-lg border border-rose-800/30 text-[#5c131d] hover:bg-rose-200/60 text-xs font-semibold transition cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset Bawaan
+                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeEditModal()" class="px-4 py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-semibold transition cursor-pointer">Batal</button>
+                    <button onclick="saveCustomization()" class="px-5 py-2 rounded-lg bg-[#5c131d] hover:bg-[#7c1f2c] text-white text-xs font-semibold shadow-md transition cursor-pointer">
+                        <i class="fa-solid fa-check mr-1"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL PENYESUAI POSISI & ZOOM BINGKAI FOTO (PHOTO FRAME FITTER)
+         ===================================================================== -->
+    <div id="photoAdjustModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-[115] hidden items-center justify-center p-4">
+        <div class="bg-[#fffdfb] text-[#2c1e20] w-full max-w-sm rounded-2xl shadow-2xl border border-rose-900/25 overflow-hidden">
+            <div class="px-4 py-3 bg-[#5c131d] text-white flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-crop-simple text-rose-200 text-xs"></i>
+                    <h3 id="adjustModalTitle" class="font-serif-display font-bold text-sm">Sesuaikan Foto di Bingkai</h3>
+                </div>
+                <button onclick="closePhotoAdjustModal()" class="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xs cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-3.5">
+                <!-- Pratinjau Bingkai Polaroid -->
+                <div class="flex flex-col items-center">
+                    <div class="polaroid w-36 h-40 mx-auto border border-rose-900/15">
+                        <div class="w-full h-full overflow-hidden bg-rose-100/70 relative flex items-center justify-center">
+                            <img id="adjustPreviewImg" src="" alt="Preview" class="w-full h-full transition-none">
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-stone-500 mt-1.5">Geser zoom ke kiri untuk memperkecil foto agar pas di bingkai</p>
+                </div>
+
+                <!-- Pilihan Mode Pas Bingkai (Utuh vs Penuh) -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btnFitContain" onclick="setAdjustFitMode('contain')" class="py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer">
+                        <i class="fa-solid fa-compress mr-1"></i> Utuh (Pas Bingkai)
+                    </button>
+                    <button id="btnFitCover" onclick="setAdjustFitMode('cover')" class="py-1.5 px-2 rounded-lg text-xs font-semibold border transition cursor-pointer">
+                        <i class="fa-solid fa-expand mr-1"></i> Penuh (Crop)
+                    </button>
+                </div>
+
+                <!-- Slider Zoom (0.5x sampai 2.5x) -->
+                <div>
+                    <div class="flex justify-between text-[11px] font-semibold text-[#5c131d] mb-0.5">
+                        <span>Ukuran Foto (Perkecil / Perbesar)</span>
+                        <span id="lblAdjustZoom">1.00x</span>
+                    </div>
+                    <input id="rngAdjustZoom" type="range" min="0.5" max="2.5" step="0.05" value="1" oninput="updatePhotoAdjustPreview()"
+                        class="w-full h-1.5 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-[#5c131d]">
+                </div>
+
+                <!-- Slider Geser Kiri/Kanan (X) -->
+                <div>
+                    <div class="flex justify-between text-[11px] font-semibold text-[#5c131d] mb-0.5">
+                        <span>Geser Kiri / Kanan</span>
+                        <span id="lblAdjustX">50%</span>
+                    </div>
+                    <input id="rngAdjustX" type="range" min="0" max="100" step="1" value="50" oninput="updatePhotoAdjustPreview()"
+                        class="w-full h-1.5 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-[#5c131d]">
+                </div>
+
+                <!-- Slider Geser Atas/Bawah (Y) -->
+                <div>
+                    <div class="flex justify-between text-[11px] font-semibold text-[#5c131d] mb-0.5">
+                        <span>Geser Atas / Bawah</span>
+                        <span id="lblAdjustY">50%</span>
+                    </div>
+                    <input id="rngAdjustY" type="range" min="0" max="100" step="1" value="50" oninput="updatePhotoAdjustPreview()"
+                        class="w-full h-1.5 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-[#5c131d]">
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex items-center justify-between gap-2 pt-1">
+                    <button onclick="resetSinglePhotoAdjust()" class="px-3 py-2 rounded-xl border border-rose-800/30 text-[#5c131d] text-xs font-semibold hover:bg-rose-50 cursor-pointer">
+                        Reset Posisi
+                    </button>
+                    <button onclick="applyPhotoAdjust()" class="flex-1 py-2 px-4 rounded-xl bg-[#5c131d] hover:bg-[#7c1f2c] text-white text-xs font-bold shadow cursor-pointer">
+                        <i class="fa-solid fa-check mr-1"></i> Terapkan ke Bingkai
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AUTENTIKASI PIN PEMBUAT -->
+    <div id="pinAuthModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-[#fffdfb] text-[#2c1e20] w-full max-w-xs rounded-2xl shadow-2xl border border-rose-900/20 overflow-hidden">
+            <div class="px-4 py-3 bg-[#5c131d] text-white flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-300 text-xs"></i>
+                    <h3 id="pinModalTitle" class="font-serif-display font-bold text-sm">Akses Khusus Pembuat</h3>
+                </div>
+                <button onclick="closePinModal()" class="w-7 h-7 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xs cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-3 text-center">
+                <p id="pinModalDesc" class="text-xs text-stone-600">
+                    Masukkan PIN Rahasia Pembuat untuk membuka mode edit.
+                </p>
+                <input id="inpAuthPin" type="password" inputmode="numeric" maxlength="6" pattern="[0-9]*"
+                    onkeydown="if(event.key==='Enter') submitCreatorPin()"
+                    class="w-full px-3 py-2.5 rounded-xl border-2 border-rose-900/25 bg-rose-50/40 text-center text-lg font-bold tracking-[0.4em] text-[#5c131d] focus:outline-none focus:border-[#5c131d]"
+                    placeholder="••••">
+                <p id="pinErrorMsg" class="text-[11px] text-rose-700 font-semibold hidden"></p>
+                <button onclick="submitCreatorPin()" class="w-full py-2.5 rounded-xl bg-[#5c131d] hover:bg-[#7c1f2c] text-white text-xs font-bold shadow transition cursor-pointer">
+                    Buka Kunci Edit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFIKASI -->
+    <div id="toastBox" class="fixed bottom-16 left-1/2 -translate-x-1/2 bg-[#5c131d] text-white px-4 py-2 rounded-full text-xs font-medium shadow-xl border border-rose-300/30 opacity-0 pointer-events-none transition-opacity duration-300 z-[120]">
+        Tersimpan!
+    </div>
+
+    <script>
+        /* ============================================================================
+1. GENERATOR 14 ILUSTRASI SVG POLAROID ROMANTIS MANDIRI
+           ============================================================================ */
+        function createRomanticIllustrationSVG(variant) {
+            const items = [
+                { bg1: '#f9d8e0', bg2: '#e8a5b5', accent: '#5c131d', title: 'Our Cover Story', sub: 'Chapter One' },
+                { bg1: '#fde8ed', bg2: '#f3bac8', accent: '#7c1f2c', title: 'First Coffee Date', sub: 'Sweet Memory' },
+                { bg1: '#f7d6df', bg2: '#dfa0b0', accent: '#5c131d', title: 'Sunset Walk', sub: 'Hand in Hand' },
+                { bg1: '#fbe4ea', bg2: '#e5aebc', accent: '#6b1622', title: 'Late Night Talks', sub: 'Pure Magic' },
+                { bg1: '#f5cfd8', bg2: '#d996a6', accent: '#5c131d', title: 'Favorite Smile', sub: 'Always You' },
+                { bg1: '#fce7ec', bg2: '#eab3c0', accent: '#7c1f2c', title: 'Two Hearts', sub: 'Connected' },
+                { bg1: '#f8d7df', bg2: '#e29fb0', accent: '#5c131d', title: 'My Safe Place', sub: 'Home Is You' },
+                { bg1: '#f4c8d3', bg2: '#d48d9f', accent: '#450d15', title: 'Key To My Heart', sub: 'Forever' },
+                { bg1: '#fde9ee', bg2: '#f0b8c6', accent: '#6b1622', title: 'Photobooth Fun', sub: 'Laughing' },
+                { bg1: '#f8d9e1', bg2: '#e4a3b3', accent: '#5c131d', title: 'Stargazing', sub: 'Under The Sky' },
+                { bg1: '#fbe5eb', bg2: '#e7b1bf', accent: '#7c1f2c', title: 'Every Milestone', sub: 'Growing Together' },
+                { bg1: '#f6d1da', bg2: '#dc99aa', accent: '#5c131d', title: 'Our Soundtrack', sub: 'Melodies' },
+                { bg1: '#f9dce3', bg2: '#e9aab9', accent: '#6b1622', title: 'Little Moments', sub: 'Big Love' },
+                { bg1: '#f3c6d1', bg2: '#d38a9c', accent: '#450d15', title: 'Always & Forever', sub: 'Infinity' }
+            ];
+            const p = items[variant % items.length];
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+                <defs>
+                    <linearGradient id="g${variant}" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="${p.bg1}"/>
+                        <stop offset="100%" stop-color="${p.bg2}"/>
+                    </linearGradient>
+                </defs>
+                <rect width="300" height="300" fill="url(#g${variant})"/>
+                <circle cx="58" cy="62" r="36" fill="#ffffff" opacity="0.28"/>
+                <circle cx="242" cy="232" r="48" fill="#ffffff" opacity="0.22"/>
+                <path d="M150 108 C150 108 114 82 114 58 C114 44 125 34 138 34 C144 34 148 38 150 42 C152 38 156 34 162 34 C175 34 186 44 186 58 C186 82 150 108 150 108 Z" fill="${p.accent}" opacity="0.88"/>
+                <circle cx="126" cy="154" r="21" fill="${p.accent}"/>
+                <path d="M92 238 C92 198 160 198 160 238 Z" fill="${p.accent}"/>
+                <circle cx="174" cy="160" r="19" fill="${p.accent}" opacity="0.85"/>
+                <path d="M142 238 C142 202 206 202 206 238 Z" fill="${p.accent}" opacity="0.85"/>
+                <text x="150" y="264" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-weight="bold" font-size="15" fill="${p.accent}">${p.title}</text>
+                <text x="150" y="283" text-anchor="middle" font-family="sans-serif" letter-spacing="2" font-size="9" fill="${p.accent}" opacity="0.8">${p.sub.toUpperCase()}</text>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        const PHOTO_COUNT = 14;
+        const DEFAULT_PHOTOS = Array.from({ length: PHOTO_COUNT }, (_, i) => createRomanticIllustrationSVG(i));
+        const DEFAULT_PHOTO_ADJUSTMENTS = Array.from({ length: PHOTO_COUNT }, () => ({
+            x: 50,
+            y: 50,
+            zoom: 1,
+            fit: 'contain'
+        }));
+
+        /* ============================================================================
+2. DATA DEFAULT, PROTEKSI PEMBUAT (CREATOR LOCK) & STATE MANAGEMENT
+           ============================================================================ */
+        const IS_LOCKED_FOR_RECIPIENT = false;
+        const EMBEDDED_CREATOR_PIN_HASH = "";
+        const EMBEDDED_CUSTOM_DATA = null;
+
+        const DEFAULT_SONGS = [
+            { title: "About You", artist: "The 1975", customUrl: null, customName: "" },
+            { title: "Until I Found You", artist: "Stephen Sanchez", customUrl: null, customName: "" },
+            { title: "Golden Hour", artist: "JVKE", customUrl: null, customName: "" }
+        ];
+
+        const DEFAULT_DATA = {
+            coverTitle: "With all my Love",
+            coupleName: "My Favorite Person",
+            anniversaryDate: "2025-05-14",
+            letterTitle: "Happy Anniversary",
+            letterBody: "Dari sekian banyak kebetulan di dunia ini, bertemu dan berjalan bersamamu adalah hal terbaik yang pernah terjadi. Terima kasih sudah menjadi rumah paling nyaman, tawa paling hangat, dan alasan di balik setiap senyumku. Mari terus menulis cerita indah kita hari ini, esok, dan selamanya.",
+            songs: JSON.parse(JSON.stringify(DEFAULT_SONGS)),
+            photos: [...DEFAULT_PHOTOS],
+            photoAdjustments: JSON.parse(JSON.stringify(DEFAULT_PHOTO_ADJUSTMENTS))
+        };
+
+        let isCreatorAuthenticated = false;
+        let appData = loadAppData();
+        let currentPage = 1;
+        const TOTAL_PAGES = 18;
+        let isMobileView = window.innerWidth <= 768;
+        let isMuted = false;
+
+        // State Musik 3 Lagu
+        let currentSongIdx = 0;
+        let isMusicPlaying = false;
+        let musicInterval = null;
+        let audioCtx = null;
+        let sessionAudioUrls = [null, null, null];
+        let activeAudioElement = null;
+
+        // State Gambar Jalur Permainan Mini "Love Maze"
+        let mazePaths = [];
+        let isDrawingMaze = false;
+
+        function computePinHash(pin) {
+            const salt = "ScrapbookCreatorLock_v1_";
+            const str = salt + String(pin).trim();
+            let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+            for (let i = 0; i < str.length; i++) {
+                const ch = str.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
+            }
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+            return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+        }
+
+        function getActivePinHash() {
+            return EMBEDDED_CREATOR_PIN_HASH || localStorage.getItem('romantic_scrapbook_pin_hash') || "";
+        }
+
+        function updateCreatorToolbarVisibility() {
+            const btnEdit = document.getElementById('btnCreatorEdit');
+            const btnLock = document.getElementById('btnCreatorLockNow');
+            if (!btnEdit || !btnLock) return;
+
+            if (isCreatorAuthenticated) {
+                btnEdit.classList.remove('hidden');
+                btnEdit.classList.add('flex');
+                btnLock.classList.remove('hidden');
+                btnLock.classList.add('flex');
+            } else {
+                btnEdit.classList.add('hidden');
+                btnEdit.classList.remove('flex');
+                btnLock.classList.add('hidden');
+                btnLock.classList.remove('flex');
+            }
+        }
+
+        function lockCreatorMode() {
+            isCreatorAuthenticated = false;
+            closeEditModal();
+            updateCreatorToolbarVisibility();
+            showToast("🔒 Tampilan terkunci (Mode Baca Saja aktif).");
+        }
+
+        let heartTapCount = 0;
+        let heartTapTimer = null;
+        function handleSecretHeartTap() {
+            heartTapCount++;
+            clearTimeout(heartTapTimer);
+            heartTapTimer = setTimeout(() => { heartTapCount = 0; }, 1600);
+            if (heartTapCount >= 5) {
+                heartTapCount = 0;
+                triggerCreatorUnlockPrompt();
+            }
+        }
+
+        let coverPressTimer = null;
+        function startCoverLongPress(e) {
+            if (e) e.stopPropagation();
+            clearTimeout(coverPressTimer);
+            coverPressTimer = setTimeout(() => {
+                triggerCreatorUnlockPrompt();
+            }, 2500);
+        }
+        function cancelCoverLongPress() {
+            clearTimeout(coverPressTimer);
+        }
+
+        function triggerCreatorUnlockPrompt() {
+            if (isCreatorAuthenticated) {
+                openEditModal();
+                return;
+            }
+            const existingHash = getActivePinHash();
+            const titleEl = document.getElementById('pinModalTitle');
+            const descEl = document.getElementById('pinModalDesc');
+            const errEl = document.getElementById('pinErrorMsg');
+            const inpEl = document.getElementById('inpAuthPin');
+
+            errEl.classList.add('hidden');
+            inpEl.value = "";
+
+            if (!existingHash) {
+                titleEl.textContent = "Buat PIN Rahasia Pembuat";
+                descEl.textContent = "Buat PIN 4–6 angka pertama kali agar hanya kamu yang bisa mengedit scrapbook ini.";
+            } else {
+                titleEl.textContent = "Verifikasi PIN Pembuat";
+                descEl.textContent = "Scrapbook ini terkunci. Masukkan PIN Rahasia Pembuat (4–6 angka) untuk mengedit.";
+            }
+
+            const modal = document.getElementById('pinAuthModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => inpEl.focus(), 80);
+        }
+
+        function closePinModal() {
+            const modal = document.getElementById('pinAuthModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitCreatorPin() {
+            const inpEl = document.getElementById('inpAuthPin');
+            const errEl = document.getElementById('pinErrorMsg');
+            const val = inpEl.value.trim();
+
+            if (!/^\d{4,6}$/.test(val)) {
+                errEl.textContent = "PIN harus terdiri dari 4 sampai 6 digit angka.";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            const existingHash = getActivePinHash();
+            const enteredHash = computePinHash(val);
+
+            if (!existingHash) {
+                localStorage.setItem('romantic_scrapbook_pin_hash', enteredHash);
+                isCreatorAuthenticated = true;
+                closePinModal();
+                updateCreatorToolbarVisibility();
+                openEditModal();
+                showToast("PIN Pembuat berhasil dibuat! Mode Edit aktif.");
+            } else if (enteredHash === existingHash) {
+                isCreatorAuthenticated = true;
+                closePinModal();
+                updateCreatorToolbarVisibility();
+                openEditModal();
+                showToast("Akses Pembuat terverifikasi!");
+            } else {
+                errEl.textContent = "PIN salah! Hanya pembuat yang dapat membuka kunci.";
+                errEl.classList.remove('hidden');
+                inpEl.value = "";
+                inpEl.focus();
+            }
+        }
+
+        function updateCreatorPin() {
+            if (!isCreatorAuthenticated) return;
+            const inp = document.getElementById('inpNewCreatorPin');
+            const val = inp.value.trim();
+            if (!/^\d{4,6}$/.test(val)) {
+                showToast("Masukkan 4–6 digit angka untuk PIN baru.");
+                return;
+            }
+            const newHash = computePinHash(val);
+            localStorage.setItem('romantic_scrapbook_pin_hash', newHash);
+            inp.value = "";
+            showToast("PIN Rahasia Pembuat diperbarui!");
+        }
+
+        function normalizePhotoAdjustments(rawAdj) {
+            return Array.from({ length: PHOTO_COUNT }, (_, idx) => {
+                const item = Array.isArray(rawAdj) && rawAdj[idx] ? rawAdj[idx] : {};
+                return {
+                    x: typeof item.x === 'number' ? item.x : 50,
+                    y: typeof item.y === 'number' ? item.y : 50,
+                    zoom: typeof item.zoom === 'number' ? item.zoom : 1,
+                    fit: item.fit === 'cover' ? 'cover' : 'contain'
+                };
+            });
+        }
+
+        function loadAppData() {
+            if (EMBEDDED_CUSTOM_DATA && typeof EMBEDDED_CUSTOM_DATA === 'object') {
+                const embedded = JSON.parse(JSON.stringify(EMBEDDED_CUSTOM_DATA));
+                if (Array.isArray(embedded.songs)) {
+                    embedded.songs.forEach((s, idx) => {
+                        if (s.embeddedAudioDataUrl) {
+                            sessionAudioUrls[idx] = s.embeddedAudioDataUrl;
+                        }
+                    });
+                }
+                embedded.photoAdjustments = normalizePhotoAdjustments(embedded.photoAdjustments);
+                return { ...DEFAULT_DATA, ...embedded };
+            }
+
+            try {
+                const saved = localStorage.getItem('romantic_scrapbook_v3');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (!Array.isArray(parsed.photos) || parsed.photos.length < PHOTO_COUNT) {
+                        const merged = [...DEFAULT_PHOTOS];
+                        if (Array.isArray(parsed.photos)) {
+                            parsed.photos.forEach((p, idx) => { if (p && idx < PHOTO_COUNT) merged[idx] = p; });
+                        }
+                        parsed.photos = merged;
+                    }
+                    if (!Array.isArray(parsed.songs) || parsed.songs.length < 3) {
+                        parsed.songs = JSON.parse(JSON.stringify(DEFAULT_SONGS));
+                    }
+                    parsed.photoAdjustments = normalizePhotoAdjustments(parsed.photoAdjustments);
+                    return { ...DEFAULT_DATA, ...parsed };
+                }
+            } catch (e) {}
+            return JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+
+        function saveAppDataToStorage() {
+            try {
+                const serializable = {
+                    ...appData,
+                    songs: appData.songs.map(s => ({ title: s.title, artist: s.artist, customName: s.customName || "" }))
+                };
+                localStorage.setItem('romantic_scrapbook_v3', JSON.stringify(serializable));
+            } catch (e) {
+                showToast("Penyimpanan browser penuh, gunakan foto berukuran lebih kecil.");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastBox');
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2400);
+        }
+
+        /* ============================================================================
+3. KALKULATOR OTOMATIS "HARI BERSAMA"
+           ============================================================================ */
+        const MONTH_NAMES_EN = [
+            "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+            "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+        ];
+        const MONTH_NAMES_ID = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        function parseAnniversaryDate(dateStr) {
+            if (!dateStr) return new Date(2025, 4, 14, 0, 0, 0);
+            const parts = dateStr.split('-').map(Number);
+            if (parts.length === 3 && !isNaN(parts[0])) {
+                return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0);
+            }
+            return new Date(2025, 4, 14, 0, 0, 0);
+        }
+
+        function calculateTogetherStats() {
+            const start = parseAnniversaryDate(appData.anniversaryDate);
+            const now = new Date();
+            let diffMs = now.getTime() - start.getTime();
+            const isFuture = diffMs < 0;
+            diffMs = Math.abs(diffMs);
+
+            const totalSeconds = Math.floor(diffMs / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const totalDays = Math.floor(totalHours / 24);
+
+            const remHours = totalHours % 24;
+            const remMinutes = totalMinutes % 60;
+            const remSeconds = totalSeconds % 60;
+
+            let years = now.getFullYear() - start.getFullYear();
+            let months = now.getMonth() - start.getMonth();
+            let days = now.getDate() - start.getDate();
+
+            if (!isFuture) {
+                if (days < 0) {
+                    months -= 1;
+                    const prevMonthDays = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+                    days += prevMonthDays;
+                }
+                if (months < 0) {
+                    years -= 1;
+                    months += 12;
+                }
+            } else {
+                years = 0;
+                months = 0;
+                days = totalDays;
+            }
+
+            const formattedDate = `${start.getDate()} ${MONTH_NAMES_ID[start.getMonth()]} ${start.getFullYear()}`;
+            const monthUpper = `${MONTH_NAMES_EN[start.getMonth()]} ${start.getFullYear()}`;
+
+            return {
+                start,
+                isFuture,
+                totalDays,
+                years: Math.max(0, years),
+                months: Math.max(0, months),
+                days: Math.max(0, days),
+                remHours,
+                remMinutes,
+                remSeconds,
+                formattedDate,
+                monthUpper,
+                annivDay: start.getDate(),
+                annivMonth: start.getMonth(),
+                annivYear: start.getFullYear()
+            };
+        }
+
+        function updateLiveCountersUI() {
+            const stats = calculateTogetherStats();
+            const headerBadge = document.getElementById('headerDaysBadge');
+            if (headerBadge) {
+                headerBadge.textContent = stats.isFuture
+                    ? `Menuju hari spesial • ${stats.totalDays} hari lagi`
+                    : `${stats.totalDays.toLocaleString('id-ID')} Hari Bersama ♥`;
+            }
+
+            const elTotalDays = document.getElementById('liveTotalDays');
+            const elBreakdown = document.getElementById('liveBreakdown');
+            const elClock = document.getElementById('liveClockTick');
+
+            if (elTotalDays) {
+                elTotalDays.textContent = `${stats.totalDays.toLocaleString('id-ID')} Hari`;
+            }
+            if (elBreakdown) {
+                elBreakdown.textContent = `${stats.years} Tahun • ${stats.months} Bulan • ${stats.days} Hari`;
+            }
+            if (elClock) {
+                const hh = String(stats.remHours).padStart(2, '0');
+                const mm = String(stats.remMinutes).padStart(2, '0');
+                const ss = String(stats.remSeconds).padStart(2, '0');
+                elClock.textContent = `${hh} jam : ${mm} mnt : ${ss} dtk`;
+            }
+        }
+
+        /* ============================================================================
+4. WEB AUDIO API (EFEK KERTAS & 3 MELODI ROMANTIS BERBEDA + MP3 KUSTOM)
+           ============================================================================ */
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playPaperFlipSound() {
+            if (isMuted) return;
+            try {
+                initAudioContext();
+                if (!audioCtx) return;
+
+                const duration = 0.2;
+                const bufferSize = audioCtx.sampleRate * duration;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+
+                for (let i = 0; i < bufferSize; i++) {
+                    const env = Math.sin((i / bufferSize) * Math.PI);
+                    data[i] = (Math.random() * 2 - 1) * env * 0.24;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(950, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(2100, audioCtx.currentTime + duration);
+                filter.Q.value = 1.4;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('iconMute');
+            icon.className = isMuted ? 'fa-solid fa-volume-xmark text-xs text-rose-300' : 'fa-solid fa-volume-high text-xs';
+            if (isMuted && isMusicPlaying) {
+                stopRomanticMusic();
+            }
+            showToast(isMuted ? "Suara dimatikan" : "Suara diaktifkan");
+        }
+
+        function selectSong(index, event) {
+            if (event) event.stopPropagation();
+            const wasPlaying = isMusicPlaying;
+            stopRomanticMusic();
+            currentSongIdx = index;
+            updateMusicUI();
+            if (wasPlaying || event) {
+                if (isMuted) {
+                    isMuted = false;
+                    document.getElementById('iconMute').className = 'fa-solid fa-volume-high text-xs';
+                }
+                startRomanticMusic();
+            }
+        }
+
+        function nextSong(event) {
+            if (event) event.stopPropagation();
+            selectSong((currentSongIdx + 1) % 3, event);
+        }
+
+        function prevSong(event) {
+            if (event) event.stopPropagation();
+            selectSong((currentSongIdx + 2) % 3, event);
+        }
+
+        function toggleVinylMusic(event) {
+            if (event) event.stopPropagation();
+            if (isMusicPlaying) {
+                stopRomanticMusic();
+            } else {
+                if (isMuted) {
+                    isMuted = false;
+                    document.getElementById('iconMute').className = 'fa-solid fa-volume-high text-xs';
+                }
+                startRomanticMusic();
+            }
+            updateMusicUI();
+        }
+
+        function startRomanticMusic() {
+            isMusicPlaying = true;
+            updateMusicUI();
+
+            if (sessionAudioUrls[currentSongIdx]) {
+                activeAudioElement = new Audio(sessionAudioUrls[currentSongIdx]);
+                activeAudioElement.loop = true;
+                activeAudioElement.play().catch(() => {});
+                return;
+            }
+
+            initAudioContext();
+            if (!audioCtx) return;
+
+            const melodies = [
+                [349.23, 440.00, 523.25, 659.25, 329.63, 392.00, 493.88, 587.33, 293.66, 349.23, 440.00, 523.25, 261.63, 329.63, 392.00, 493.88],
+                [392.00, 493.88, 587.33, 739.99, 369.99, 440.00, 587.33, 659.25, 329.63, 392.00, 493.88, 587.33, 261.63, 329.63, 392.00, 523.25],
+                [523.25, 659.25, 783.99, 659.25, 493.88, 587.33, 783.99, 587.33, 440.00, 523.25, 659.25, 523.25, 349.23, 440.00, 523.25, 659.25]
+            ];
+
+            const notes = melodies[currentSongIdx % melodies.length];
+            const waveTypes = ['sine', 'triangle', 'sine'];
+            const tempos = [500, 440, 540];
+            let idx = 0;
+
+            const playNote = () => {
+                if (!isMusicPlaying || isMuted || !audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = waveTypes[currentSongIdx % waveTypes.length];
+                osc.frequency.setValueAtTime(notes[idx % notes.length], audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.1);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.15);
+                idx++;
+            };
+
+            playNote();
+            musicInterval = setInterval(playNote, tempos[currentSongIdx % tempos.length]);
+        }
+
+        function stopRomanticMusic() {
+            isMusicPlaying = false;
+            if (activeAudioElement) {
+                activeAudioElement.pause();
+                activeAudioElement = null;
+            }
+            if (musicInterval) {
+                clearInterval(musicInterval);
+                musicInterval = null;
+            }
+            updateMusicUI();
+        }
+
+        function updateMusicUI() {
+            const currentSong = appData.songs[currentSongIdx] || DEFAULT_SONGS[0];
+
+            const miniIcon = document.getElementById('miniPlayIcon');
+            const miniLabel = document.getElementById('miniSongLabel');
+            if (miniIcon) miniIcon.className = `fa-solid ${isMusicPlaying ? 'fa-pause text-amber-300' : 'fa-play text-rose-300'} text-[10px]`;
+            if (miniLabel) miniLabel.textContent = `${currentSongIdx + 1}. ${currentSong.title}`;
+
+            const vinylDisk = document.getElementById('vinylDisk');
+            const playIcon = document.getElementById('vinylPlayIcon');
+            const titleEl = document.getElementById('playerSongTitle');
+            const artistEl = document.getElementById('playerSongArtist');
+
+            if (vinylDisk) {
+                if (isMusicPlaying) vinylDisk.classList.add('vinyl-spinning');
+                else vinylDisk.classList.remove('vinyl-spinning');
+            }
+            if (playIcon) playIcon.className = isMusicPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play ml-0.5';
+            if (titleEl) titleEl.textContent = currentSong.title;
+            if (artistEl) artistEl.textContent = currentSong.artist;
+
+            for (let i = 0; i < 3; i++) {
+                const trackBtn = document.getElementById(`trackBtn${i}`);
+                if (trackBtn) {
+                    if (i === currentSongIdx) {
+                        trackBtn.className = "w-full px-2.5 py-1.5 rounded-lg bg-white text-[#5c131d] font-bold text-[10px] flex items-center justify-between shadow cursor-pointer transition";
+                    } else {
+                        trackBtn.className = "w-full px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-rose-100 text-[10px] flex items-center justify-between cursor-pointer transition";
+                    }
+                }
+            }
+        }
+
+        /* ============================================================================
+5. RENDER 18 HALAMAN SCRAPBOOK DENGAN PENYESUAIAN BINGKAI FOTO
+           ============================================================================ */
+        function getPhotoStyle(idx) {
+            const adj = (appData.photoAdjustments && appData.photoAdjustments[idx]) || { x: 50, y: 50, zoom: 1, fit: 'contain' };
+            const fitMode = adj.fit === 'cover' ? 'cover' : 'contain';
+            return `object-fit:${fitMode}; object-position:${adj.x}% ${adj.y}%; transform:scale(${adj.zoom}); transform-origin:${adj.x}% ${adj.y}%;`;
+        }
+
+        function photoTag(idx, extraClass = "") {
+            const fallback = DEFAULT_PHOTOS[idx] || DEFAULT_PHOTOS[0];
+            const src = appData.photos[idx] || fallback;
+            const styleStr = getPhotoStyle(idx);
+            return `<img src="${src}" style="${styleStr}" onerror="this.onerror=null;this.src='${fallback}';" alt="Memory ${idx + 1}" class="w-full h-full ${extraClass}" draggable="false">`;
+        }
+
+        function renderHeartFramedPhoto(idx, clipId, strokeColor, strokeWidth = 5) {
+            const adj = (appData.photoAdjustments && appData.photoAdjustments[idx]) || { x: 50, y: 50, zoom: 1, fit: 'contain' };
+            const preserveRatio = adj.fit === 'cover' ? 'xMidYMid slice' : 'xMidYMid meet';
+            const offsetX = ((50 - adj.x) * 0.7).toFixed(1);
+            const offsetY = ((50 - adj.y) * 0.7).toFixed(1);
+            const scale = adj.zoom || 1;
+            const transformAttr = `translate(100 92.5) scale(${scale}) translate(${-100 + Number(offsetX)} ${-92.5 + Number(offsetY)})`;
+
+            return `<svg viewBox="0 0 200 185" class="w-full h-full overflow-visible">
+                <defs>
+                    <clipPath id="${clipId}">
+                        <path d="M 100 175 C 100 175, 12 115, 12 58 C 12 25, 38 6, 68 6 C 85 6, 95 16, 100 27 C 105 16, 115 6, 132 6 C 162 6, 188 25, 188 58 C 188 115, 100 175, 100 175 Z"/>
+                    </clipPath>
+                </defs>
+                <g clip-path="url(#${clipId})">
+                    <rect width="200" height="185" fill="#fde8ed"/>
+                    <image href="${appData.photos[idx]}" width="200" height="185" preserveAspectRatio="${preserveRatio}" transform="${transformAttr}"/>
+                </g>
+                <path d="M 100 175 C 100 175, 12 115, 12 58 C 12 25, 38 6, 68 6 C 85 6, 95 16, 100 27 C 105 16, 115 6, 132 6 C 162 6, 188 25, 188 58 C 188 115, 100 175, 100 175 Z" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+            </svg>`;
+        }
+
+        function renderButterflySVG(color = "#fce7ec", size = 18) {
+            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" class="inline-block drop-shadow-xs">
+                <path d="M12 10C10.5 6 6 3 3 5C0.5 6.8 2 11.5 5.5 13C3 14.5 2.5 18.5 5.5 19.5C8 20.3 10.5 17.5 12 14.5C13.5 17.5 16 20.3 18.5 19.5C21.5 18.5 21 14.5 18.5 13C22 11.5 23.5 6.8 21 5C18 3 13.5 6 12 10Z"/>
+            </svg>`;
+        }
+
+        function renderRibbonSVG(color = "#9e2a3b", size = 34) {
+            return `<svg width="${size}" height="${Math.round(size * 0.68)}" viewBox="0 0 48 32" fill="none" class="drop-shadow-xs">
+                <path d="M24 14C18 6 6 4 4 11C2 17 12 20 24 15C36 20 46 17 44 11C42 4 30 6 24 14Z" fill="${color}"/>
+                <path d="M22 15L13 29L18 27L24 17L30 27L35 29L26 15" fill="${color}"/>
+                <circle cx="24" cy="14.5" r="3.2" fill="#5c131d"/>
+            </svg>`;
+        }
+
+        function renderAccurateCalendar(stats) {
+            const firstDayOfWeek = new Date(stats.annivYear, stats.annivMonth, 1).getDay();
+            const daysInMonth = new Date(stats.annivYear, stats.annivMonth + 1, 0).getDate();
+            let cells = '';
+            for (let b = 0; b < firstDayOfWeek; b++) {
+                cells += `<span></span>`;
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                if (d === stats.annivDay) {
+                    cells += `<span class="bg-[#5c131d] text-white rounded-full font-bold flex items-center justify-center aspect-square shadow-xs" title="Tanggal Jadian: ${d}">♥</span>`;
+                } else {
+                    cells += `<span class="py-0.5">${d}</span>`;
+                }
+            }
+            return cells;
+        }
+
+        function getPageHTML(pageNum) {
+            const stats = calculateTogetherStats();
+            const currentSong = appData.songs[currentSongIdx] || DEFAULT_SONGS[0];
+
+            switch (pageNum) {
+                /* 1. FRONT COVER (Foto 1) */
+                case 1:
+                    return `
+                    <div class="w-full h-full bg-maroon-cover text-white p-5 sm:p-6 flex flex-col justify-between relative">
+                        <div class="absolute inset-3 border border-amber-200/20 rounded-lg pointer-events-none"></div>
+                        <div class="flex justify-between items-center z-10">
+                            <span onmousedown="startCoverLongPress(event)" onmouseup="cancelCoverLongPress()" onmouseleave="cancelCoverLongPress()"
+                                ontouchstart="startCoverLongPress(event)" ontouchend="cancelCoverLongPress()" ontouchcancel="cancelCoverLongPress()"
+                                class="text-[9px] tracking-[0.25em] uppercase text-rose-200/75 cursor-default py-1 pr-2">FOR YOU</span>
+                            ${renderButterflySVG("#fce7ec", 19)}
+                        </div>
+
+                        <div class="my-auto flex flex-col items-center z-10">
+                            <div class="relative mb-3">
+                                <div class="absolute -top-3 -left-3 z-20 -rotate-12">${renderRibbonSVG("#b83346", 34)}</div>
+                                <div class="polaroid w-32 h-36 sm:w-36 sm:h-40 -rotate-6">
+                                    <div class="w-full h-full overflow-hidden bg-rose-100 flex items-center justify-center">${photoTag(0)}</div>
+                                </div>
+                                <div class="absolute -bottom-2 -right-3 z-20 rotate-12">${renderButterflySVG("#ffffff", 17)}</div>
+                            </div>
+
+                            <div class="text-center px-2">
+                                <p class="font-script text-3xl sm:text-4xl text-rose-100 drop-shadow leading-tight">
+                                    ${escapeHtml(appData.coverTitle)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="text-center z-10">
+                            <p class="text-[11px] tracking-[0.18em] uppercase text-rose-200/85 font-cormorant">
+                                ${escapeHtml(appData.coupleName)}
+                            </p>
+                        </div>
+                    </div>`;
+
+                /* 2. INSIDE COVER: LIVE COUNTER "HARI BERSAMA" OTOMATIS */
+                case 2:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-5 flex flex-col items-center justify-between relative text-[#5c131d]">
+                        <div class="w-full flex justify-between items-center">
+                            <span class="text-[9px] uppercase tracking-widest text-rose-900/60 font-semibold">Since ${escapeHtml(stats.formattedDate)}</span>
+                            ${renderButterflySVG("#5c131d", 16)}
+                        </div>
+
+                        <div class="text-center my-auto w-full">
+                            <p class="font-script text-3xl sm:text-4xl text-[#5c131d] mb-1">Hari Bersama</p>
+                            <div class="bg-maroon-cover text-white rounded-2xl p-4 shadow-xl border border-amber-200/25 mx-auto">
+                                <p id="liveTotalDays" class="font-serif-display text-3xl sm:text-4xl font-bold tracking-tight text-rose-50">
+                                    ${stats.totalDays.toLocaleString('id-ID')} Hari
+                                </p>
+                                <p id="liveBreakdown" class="font-cormorant italic text-sm text-amber-200/95 mt-1">
+                                    ${stats.years} Tahun • ${stats.months} Bulan • ${stats.days} Hari
+                                </p>
+                                <div class="mt-2.5 pt-2 border-t border-white/15">
+                                    <span id="liveClockTick" class="inline-block px-3 py-0.5 rounded-full bg-black/30 text-[11px] font-mono text-rose-200">
+                                        ${String(stats.remHours).padStart(2,'0')} jam : ${String(stats.remMinutes).padStart(2,'0')} mnt : ${String(stats.remSeconds).padStart(2,'0')} dtk
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="font-cormorant italic text-xs text-center text-[#5c131d]/85">
+                            "Setiap detik bersamamu adalah anugerah terindah."
+                        </p>
+                    </div>`;
+
+                /* 3. KALENDER BULAN JADIAN & PHOTOBOOTH (Foto 2, 3, 4) */
+                case 3:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-3.5 sm:p-4 flex items-center justify-between gap-2.5 relative text-[#2c1e20]">
+                        <div class="w-[46%] h-[93%] bg-[#5c131d] p-2 rounded shadow-lg flex flex-col justify-between relative">
+                            <div class="washi-tape -top-2 left-1/2 -translate-x-1/2 rotate-2"></div>
+                            <div class="h-[30%] w-full overflow-hidden rounded-xs bg-rose-50 flex items-center justify-center">${photoTag(1)}</div>
+                            <div class="h-[30%] w-full overflow-hidden rounded-xs bg-rose-50 flex items-center justify-center">${photoTag(2)}</div>
+                            <div class="h-[30%] w-full overflow-hidden rounded-xs bg-rose-50 flex items-center justify-center">${photoTag(3)}</div>
+                            <p class="text-[8px] text-center text-rose-100/85 tracking-widest uppercase font-cormorant">Our Moments</p>
+                        </div>
+
+                        <div class="w-[52%] h-[93%] flex flex-col justify-between py-1">
+                            <div class="text-center">
+                                <div class="flex justify-center mb-1">${renderRibbonSVG("#7c1f2c", 30)}</div>
+                                <h3 class="font-script text-2xl sm:text-3xl text-[#5c131d] leading-tight">The Day<br>It Began</h3>
+                            </div>
+
+                            <div class="bg-white border border-[#5c131d]/25 rounded-lg p-2 shadow-xs">
+                                <div class="bg-[#5c131d] text-white text-[8.5px] font-bold tracking-widest text-center py-1 rounded mb-1.5 uppercase">
+                                    ${escapeHtml(stats.monthUpper)}
+                                </div>
+                                <div class="grid grid-cols-7 gap-0.5 text-center text-[8px] font-medium text-stone-700">
+                                    <span class="font-bold text-rose-800">S</span><span class="font-bold">M</span><span class="font-bold">T</span><span class="font-bold">W</span><span class="font-bold">T</span><span class="font-bold">F</span><span class="font-bold">S</span>
+                                    ${renderAccurateCalendar(stats)}
+                                </div>
+                            </div>
+
+                            <p class="text-[9px] text-center font-semibold text-[#5c131d]">
+                                ${escapeHtml(stats.formattedDate)}
+                            </p>
+                        </div>
+                    </div>`;
+
+                /* 4. POLAROID GRID 4 FOTO KENANGAN (Foto 5, 6, 7, 8) */
+                case 4:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-3.5 sm:p-4 flex flex-col justify-between relative">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-script text-2xl sm:text-3xl text-[#5c131d] leading-none">Sweet Snapshots</h3>
+                            ${renderButterflySVG("#5c131d", 16)}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 my-auto max-w-[240px] mx-auto w-full">
+                            <div class="polaroid -rotate-2 relative">
+                                <div class="washi-tape -top-2 left-1/2 -translate-x-1/2"></div>
+                                <div class="aspect-square overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(4)}</div>
+                                <p class="text-[8px] text-center font-cormorant italic text-stone-600 mt-1">Memory #01</p>
+                            </div>
+                            <div class="polaroid rotate-2 relative">
+                                <div class="washi-tape -top-2 left-1/2 -translate-x-1/2"></div>
+                                <div class="aspect-square overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(5)}</div>
+                                <p class="text-[8px] text-center font-cormorant italic text-stone-600 mt-1">Memory #02</p>
+                            </div>
+                            <div class="polaroid rotate-1 relative">
+                                <div class="aspect-square overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(6)}</div>
+                                <p class="text-[8px] text-center font-cormorant italic text-stone-600 mt-1">Memory #03</p>
+                            </div>
+                            <div class="polaroid -rotate-2 relative">
+                                <div class="aspect-square overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(7)}</div>
+                                <p class="text-[8px] text-center font-cormorant italic text-stone-600 mt-1">Memory #04</p>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 5. HEART PHOTO FRAME ("I love you" - Foto 9) */
+                case 5:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 flex flex-col justify-evenly items-center pointer-events-none select-none py-3 -rotate-6 scale-110">
+                            <p class="font-script text-2xl sm:text-3xl text-[#5c131d]/25">i love you</p>
+                            <p class="font-cormorant italic text-xl sm:text-2xl text-[#5c131d]/50">i love you</p>
+                            <p class="font-script text-3xl sm:text-4xl text-[#5c131d]">i love you</p>
+                            <p class="font-serif-display italic text-xl sm:text-2xl text-[#5c131d]/75">i love you</p>
+                            <p class="font-script text-3xl sm:text-4xl text-[#5c131d]">i love you</p>
+                            <p class="font-cormorant italic text-xl sm:text-2xl text-[#5c131d]/50">i love you</p>
+                            <p class="font-script text-2xl sm:text-3xl text-[#5c131d]/25">i love you</p>
+                        </div>
+
+                        <div class="relative z-10 w-36 h-32 sm:w-40 sm:h-36 drop-shadow-xl flex items-center justify-center">
+                            ${renderHeartFramedPhoto(8, 'heartClipP5', '#5c131d', 5)}
+                        </div>
+                    </div>`;
+
+                /* 6. MOSAIC HEART 7 FOTO ("Love You" - Foto 1, 2, 3, 4, 5, 6, 10) */
+                case 6:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col items-center justify-between relative">
+                        <h3 class="font-script text-3xl text-[#5c131d] mt-1">Love You</h3>
+
+                        <div class="grid grid-cols-3 gap-1.5 w-40 sm:w-44 my-auto">
+                            <div class="aspect-square rounded-tl-2xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(0)}</div>
+                            <div class="aspect-square rounded-t-xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(1)}</div>
+                            <div class="aspect-square rounded-tr-2xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(2)}</div>
+                            <div class="aspect-square rounded-bl-xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(3)}</div>
+                            <div class="aspect-square overflow-hidden shadow border-2 border-[#5c131d] scale-105 z-10 bg-rose-50 flex items-center justify-center">${photoTag(9)}</div>
+                            <div class="aspect-square rounded-br-xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(4)}</div>
+                            <div class="col-start-2 aspect-square rounded-b-3xl overflow-hidden shadow border border-white bg-rose-50 flex items-center justify-center">${photoTag(5)}</div>
+                        </div>
+
+                        <div class="text-center mb-1">
+                            <p class="font-serif-display font-bold text-xs text-[#5c131d]">I found it</p>
+                            <p class="font-cormorant italic text-[11px] text-stone-600">a love that feels like home</p>
+                        </div>
+                    </div>`;
+
+                /* 7. DOUBLE POLAROID & LIVE DAYS BADGE (Foto 10 & 11) */
+                case 7:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col justify-between relative overflow-hidden">
+                        <div class="flex justify-between items-center">
+                            <span class="font-script text-2xl sm:text-3xl text-[#5c131d]">My favorite</span>
+                            ${renderButterflySVG("#5c131d", 18)}
+                        </div>
+
+                        <div class="relative flex-1 flex items-center justify-center my-2">
+                            <div class="polaroid w-28 h-32 sm:w-32 sm:h-36 -rotate-12 -translate-x-4 -translate-y-4 relative">
+                                <div class="washi-tape -top-2 left-4 -rotate-6"></div>
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(9)}</div>
+                            </div>
+                            <div class="polaroid w-28 h-32 sm:w-32 sm:h-36 rotate-6 translate-x-5 translate-y-5 relative z-10">
+                                <div class="washi-tape -top-2 right-3 rotate-12"></div>
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(10)}</div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="inline-block border-y border-[#5c131d]/40 py-1 px-4">
+                                <p class="font-cormorant italic font-semibold text-base text-[#5c131d] tracking-wider">
+                                    ${stats.totalDays.toLocaleString('id-ID')} days with u
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 8. LOVE LETTER ("Happy Anniversary") */
+                case 8:
+                    return `
+                    <div class="w-full h-full bg-maroon-gingham p-4 sm:p-5 flex items-center justify-center relative">
+                        <div class="w-full h-full bg-lined-paper rounded-lg shadow-xl p-4 flex flex-col justify-between relative border border-rose-900/25">
+                            <div class="text-center border-b border-rose-900/20 pb-2">
+                                <div class="inline-block bg-[#5c131d] text-white px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase mb-1">
+                                    ${escapeHtml(stats.formattedDate)}
+                                </div>
+                                <h3 class="font-script text-2xl sm:text-3xl text-[#5c131d] leading-none">
+                                    ${escapeHtml(appData.letterTitle)}
+                                </h3>
+                            </div>
+
+                            <div class="my-auto py-1.5 overflow-y-auto max-h-[65%] pr-1">
+                                <p class="font-cormorant text-xs sm:text-[13px] text-stone-800 leading-relaxed text-justify italic">
+                                    "${escapeHtml(appData.letterBody)}"
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1 border-t border-rose-900/15">
+                                <span class="text-[9px] text-rose-900/70 font-cormorant">Forever & Always</span>
+                                <span class="font-script text-lg text-[#5c131d]">With Love ♥</span>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 9. COUPLE KEYCHAIN ("Our Lovely Keychain" - Foto 11 & 12) */
+                case 9:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col items-center justify-between relative">
+                        <div class="text-center mt-1">
+                            <p class="font-script text-2xl sm:text-3xl text-[#5c131d]">Our Lovely Keychain</p>
+                            <p class="text-[10px] text-stone-500 font-cormorant italic">Two halves of one heart</p>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-4 my-auto">
+                            <div class="flex flex-col items-center -rotate-6">
+                                <div class="w-6 h-6 rounded-full border-[3px] border-stone-400 shadow-inner"></div>
+                                <div class="w-1 h-4 bg-stone-400"></div>
+                                <div class="w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg">
+                                    ${renderHeartFramedPhoto(10, 'kcClip1', '#d4af37', 6)}
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-center rotate-6 translate-y-4">
+                                <div class="w-6 h-6 rounded-full border-[3px] border-stone-400 shadow-inner"></div>
+                                <div class="w-1 h-4 bg-stone-400"></div>
+                                <div class="w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg">
+                                    ${renderHeartFramedPhoto(11, 'kcClip2', '#5c131d', 6)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 10. FILM STRIP ("L O V E" - Foto 6, 7, 13) */
+                case 10:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-3.5 sm:p-4 flex items-center justify-between gap-2.5 relative text-[#5c131d]">
+                        <div class="w-[46%] h-[93%] bg-stone-950 p-2 rounded flex flex-col justify-between border-x-4 border-dashed border-stone-700 shadow-lg">
+                            <div class="h-[30%] w-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(5)}</div>
+                            <div class="h-[30%] w-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(6)}</div>
+                            <div class="h-[30%] w-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(12)}</div>
+                        </div>
+
+                        <div class="w-[50%] h-[93%] flex flex-col items-center justify-between py-2 text-center">
+                            <div class="font-serif-display font-bold text-3xl sm:text-4xl tracking-[0.2em] leading-tight text-[#5c131d]">
+                                L<br>O<br>V<br>E
+                            </div>
+                            <div class="w-10 h-[1px] bg-[#5c131d]/30"></div>
+                            <p class="font-script text-xl sm:text-2xl text-[#5c131d] leading-tight">
+                                you are my favorite
+                            </p>
+                        </div>
+                    </div>`;
+
+                /* 11. INTERACTIVE MINI-GAME ("Love Maze") */
+                case 11:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col items-center justify-between relative">
+                        <div class="w-full flex items-center justify-between gap-2">
+                            <div>
+                                <h3 class="font-script text-2xl sm:text-3xl text-[#5c131d] leading-none">Love Maze</h3>
+                            </div>
+                        </div>
+
+                        <div class="relative w-48 h-48 sm:w-52 sm:h-52 my-auto flex items-center justify-center">
+                            <svg viewBox="0 0 220 220" class="w-full h-full pointer-events-none">
+                                <path d="M110 200 C110 200 18 135 18 70 C18 32 48 12 78 12 C95 12 105 22 110 34 C115 22 125 12 142 12 C172 12 202 32 202 70 C202 135 110 200 110 200 Z"
+                                    fill="none" stroke="#5c131d" stroke-width="3.5" stroke-dasharray="140 16 180 18 140"/>
+                                <path d="M110 176 C110 176 38 122 38 72 C38 44 60 28 84 28 C97 28 106 36 110 46 C114 36 123 28 136 28 C160 28 182 44 182 72 C182 122 110 176 110 176 Z"
+                                    fill="none" stroke="#5c131d" stroke-width="3" stroke-dasharray="110 15 150 15 120"/>
+                                <path d="M110 152 C110 152 58 110 58 74 C58 54 74 44 90 44 C100 44 107 50 110 58 C113 50 120 44 130 44 C146 44 162 54 162 74 C162 110 110 152 110 152 Z"
+                                    fill="none" stroke="#5c131d" stroke-width="3" stroke-dasharray="90 16 120 16"/>
+                                <path d="M110 118 C110 118 86 100 86 84 C86 74 94 68 102 68 C106 68 109 71 110 74 C111 71 114 68 118 68 C126 68 134 74 134 84 C134 100 110 118 110 118 Z"
+                                    fill="#9e2a3b"/>
+                                <text x="110" y="91" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">HEART</text>
+                            </svg>
+                            <canvas id="mazeCanvas" width="240" height="240"
+                                class="absolute inset-0 w-full h-full touch-none cursor-crosshair z-20"></canvas>
+                        </div>
+
+                        <div class="w-full flex justify-between items-center text-[10px] font-bold text-[#5c131d]">
+                            <span class="px-2 py-0.5 rounded bg-[#fce7ec] border border-rose-300">START ➔</span>
+                            <span class="font-cormorant italic font-normal text-stone-600">All roads lead to you</span>
+                        </div>
+                    </div>`;
+
+                /* 12. WINDING ROAD ("On The Way to Your Heart" - Foto 2 & 8) */
+                case 12:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col justify-between relative overflow-hidden text-[#5c131d]">
+                        <div class="text-center z-10">
+                            <h3 class="font-script text-2xl sm:text-3xl leading-none">On The Way</h3>
+                            <p class="font-cormorant italic text-xs text-stone-600">to Your Heart</p>
+                        </div>
+
+                        <div class="relative flex-1 w-full my-1 flex items-center justify-center">
+                            <svg viewBox="0 0 220 260" class="w-full h-full">
+                                <path d="M40 240 C180 220, 30 175, 175 145 C200 135, 35 90, 145 45"
+                                    fill="none" stroke="#5c131d" stroke-width="16" stroke-linecap="round"/>
+                                <path d="M40 240 C180 220, 30 175, 175 145 C200 135, 35 90, 145 45"
+                                    fill="none" stroke="#fffdfb" stroke-width="2" stroke-dasharray="6 6"/>
+                                <path d="M165 48 C165 48 145 33 145 20 C145 12 151 7 158 7 C161 7 164 9 165 12 C166 9 169 7 172 7 C179 7 185 12 185 20 C185 33 165 48 165 48 Z" fill="#9e2a3b"/>
+                            </svg>
+
+                            <div class="polaroid w-16 h-20 -rotate-6 absolute bottom-6 left-4 p-1 pb-3">
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(1)}</div>
+                            </div>
+                            <div class="polaroid w-16 h-20 rotate-6 absolute top-16 right-4 p-1 pb-3">
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(7)}</div>
+                            </div>
+                        </div>
+
+                        <p class="text-[9px] text-center uppercase tracking-widest font-semibold text-[#5c131d]">
+                            Every step leads me closer to you
+                        </p>
+                    </div>`;
+
+                /* 13. INTERACTIVE 3-SONG VINYL MUSIC PLAYER (Foto 12) */
+                case 13:
+                    return `
+                    <div class="w-full h-full bg-maroon-cover text-white p-3.5 sm:p-4 flex flex-col justify-between relative">
+                        <div class="text-center">
+                            <p class="text-[8.5px] tracking-[0.25em] uppercase text-rose-200/75">Our 3-Song Playlist</p>
+                            <h3 id="playerSongTitle" class="font-serif-display text-base sm:text-lg font-bold text-white mt-0.5 truncate">
+                                ${escapeHtml(currentSong.title)}
+                            </h3>
+                            <p id="playerSongArtist" class="text-[11px] text-rose-200/80 font-cormorant italic">
+                                ${escapeHtml(currentSong.artist)}
+                            </p>
+                        </div>
+
+                        <div class="relative flex items-center justify-center my-1">
+                            <div id="vinylDisk" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-stone-950 border-4 border-stone-800 shadow-2xl flex items-center justify-center translate-x-7 ${isMusicPlaying ? 'vinyl-spinning' : ''}">
+                                <div class="w-16 h-16 rounded-full border border-white/15 flex items-center justify-center">
+                                    <div class="w-9 h-9 rounded-full bg-[#8c2736] border-2 border-amber-200/50 flex items-center justify-center">
+                                        <div class="w-2 h-2 rounded-full bg-stone-950"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shadow-2xl border-2 border-white/25 -translate-x-7 z-10 bg-rose-100 flex items-center justify-center">
+                                ${photoTag(11)}
+                            </div>
+                        </div>
+
+                        <div class="bg-black/30 rounded-xl p-2.5 border border-white/10 space-y-2">
+                            <div class="flex items-center justify-center gap-5">
+                                <button onclick="prevSong(event)" title="Lagu Sebelumnya" class="text-rose-200/80 hover:text-white text-xs cursor-pointer">
+                                    <i class="fa-solid fa-backward-step"></i>
+                                </button>
+                                <button onclick="toggleVinylMusic(event)" class="w-9 h-9 rounded-full bg-white text-[#5c131d] hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg transition cursor-pointer">
+                                    <i id="vinylPlayIcon" class="fa-solid ${isMusicPlaying ? 'fa-pause' : 'fa-play ml-0.5'} text-xs"></i>
+                                </button>
+                                <button onclick="nextSong(event)" title="Lagu Berikutnya" class="text-rose-200/80 hover:text-white text-xs cursor-pointer">
+                                    <i class="fa-solid fa-forward-step"></i>
+                                </button>
+                            </div>
+
+                            <div class="space-y-1">
+                                ${appData.songs.map((song, idx) => `
+                                    <button id="trackBtn${idx}" onclick="selectSong(${idx}, event)"
+                                        class="${idx === currentSongIdx
+                                            ? 'w-full px-2.5 py-1.5 rounded-lg bg-white text-[#5c131d] font-bold text-[10px] flex items-center justify-between shadow cursor-pointer transition'
+                                            : 'w-full px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-rose-100 text-[10px] flex items-center justify-between cursor-pointer transition'}">
+                                        <span class="truncate">${idx + 1}. ${escapeHtml(song.title)}</span>
+                                        <span class="text-[9px] opacity-80 ml-1 shrink-0">${idx === currentSongIdx && isMusicPlaying ? 'Playing ♪' : escapeHtml(song.artist)}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 14. POLAROID BOW & HANDPRINTS (Foto 13) */
+                case 14:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col justify-between relative text-[#2c1e20]">
+                        <div class="relative mx-auto mt-1">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20">${renderRibbonSVG("#5c131d", 32)}</div>
+                            <div class="bg-[#5c131d] p-2 pb-5 rounded shadow-md">
+                                <div class="w-32 h-28 sm:w-36 sm:h-32 overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(12)}</div>
+                            </div>
+                        </div>
+
+                        <div class="text-center px-2">
+                            <p class="font-script text-2xl text-[#5c131d]">Promise</p>
+                            <p class="font-cormorant italic text-xs text-stone-600">
+                                "I will always hold your hand through every season."
+                            </p>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-3 pb-1">
+                            <i class="fa-solid fa-hand text-3xl sm:text-4xl text-stone-400/75 -rotate-12"></i>
+                            <i class="fa-solid fa-heart text-base text-[#5c131d]"></i>
+                            <i class="fa-solid fa-hand text-3xl sm:text-4xl text-[#5c131d]/85 rotate-12 scale-x-[-1]"></i>
+                        </div>
+                    </div>`;
+
+                /* 15. SCRAPBOOK COLLAGE & RETRO CASSETTE (Foto 3 & 9) */
+                case 15:
+                    return `
+                    <div class="w-full h-full bg-maroon-cover p-4 flex flex-col justify-between relative">
+                        <div class="flex justify-center items-center gap-2 mt-1">
+                            <div class="polaroid w-24 h-28 -rotate-6 p-1.5 pb-4">
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(2)}</div>
+                            </div>
+                            <div class="polaroid w-24 h-28 rotate-6 p-1.5 pb-4">
+                                <div class="w-full h-full overflow-hidden bg-rose-50 flex items-center justify-center">${photoTag(8)}</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-grid-paper p-2.5 rounded-lg shadow-md border border-rose-200 my-1">
+                            <p class="font-script text-xl text-[#5c131d] leading-none">Our Mixtape</p>
+                            <p class="text-[9px] text-stone-700 font-cormorant mt-0.5">
+                                Tiga lagu yang selalu mengingatkanku pada dirimu.
+                            </p>
+                        </div>
+
+                        <div class="bg-[#fffdfb] rounded-xl p-2 shadow-lg border-2 border-stone-800">
+                            <div class="bg-[#5c131d] text-white text-[8px] font-bold px-2 py-0.5 rounded-t text-center tracking-widest">
+                                LOVE MIXTAPE • 3 TRACKS
+                            </div>
+                            <div class="bg-stone-800 p-2 rounded-b flex items-center justify-around">
+                                <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                                <div class="w-10 h-3 bg-amber-900/80 rounded-xs"></div>
+                                <div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 16. REASONS I LOVE YOU (Sticky Notes) */
+                case 16:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col justify-between relative text-[#5c131d]">
+                        <div class="text-center">
+                            <h3 class="font-script text-2xl sm:text-3xl leading-none">Reasons I Love You</h3>
+                            <p class="text-[9px] text-stone-500 mt-0.5">Hal-hal kecil yang membuatku jatuh cinta setiap hari</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 my-auto">
+                            <div class="bg-[#fce7ec] p-2.5 rounded-lg shadow-xs border border-rose-200 -rotate-2">
+                                <p class="font-bold text-[10px] mb-0.5">#01 Senyummu</p>
+                                <p class="font-cormorant italic text-[11px] text-stone-700 leading-tight">Selalu berhasil menenangkan hariku yang paling lelah.</p>
+                            </div>
+                            <div class="bg-amber-50 p-2.5 rounded-lg shadow-xs border border-amber-200 rotate-2">
+                                <p class="font-bold text-[10px] mb-0.5">#02 Perhatianmu</p>
+                                <p class="font-cormorant italic text-[11px] text-stone-700 leading-tight">Kamu selalu ingat hal-hal kecil tentangku.</p>
+                            </div>
+                            <div class="bg-rose-100/80 p-2.5 rounded-lg shadow-xs border border-rose-200 rotate-1">
+                                <p class="font-bold text-[10px] mb-0.5">#03 Tawa Kita</p>
+                                <p class="font-cormorant italic text-[11px] text-stone-700 leading-tight">Bercanda denganmu tidak pernah membosankan.</p>
+                            </div>
+                            <div class="bg-[#fce7ec] p-2.5 rounded-lg shadow-xs border border-rose-200 -rotate-1">
+                                <p class="font-bold text-[10px] mb-0.5">#04 Kehadiranmu</p>
+                                <p class="font-cormorant italic text-[11px] text-stone-700 leading-tight">Bersamamu selalu terasa seperti pulang ke rumah.</p>
+                            </div>
+                        </div>
+
+                        <p class="text-[9px] text-center font-semibold tracking-widest uppercase">And a million more reasons ♥</p>
+                    </div>`;
+
+                /* 17. "YOU'RE MY HOME" & FINAL KEEPSAKE (Foto 14) */
+                case 17:
+                    return `
+                    <div class="w-full h-full bg-cream-paper p-4 flex flex-col items-center justify-between relative text-[#5c131d]">
+                        <div class="relative w-36 h-32 sm:w-40 sm:h-36 flex flex-col items-center justify-center">
+                            <svg viewBox="0 0 200 180" class="w-full h-full">
+                                <path d="M25 85 L100 20 L175 85" fill="none" stroke="#5c131d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M45 72 L45 160 L155 160 L155 72" fill="#fff" stroke="#5c131d" stroke-width="4.5" stroke-linejoin="round"/>
+                                <path d="M135 48 L135 28 L152 28 L152 62" fill="none" stroke="#5c131d" stroke-width="4"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pt-7 text-center">
+                                <p class="font-serif-display font-bold text-xs sm:text-sm tracking-wider text-[#5c131d] leading-tight">
+                                    YOU'RE<br>MY<br>HOME
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="w-full bg-maroon-cover text-white p-3 rounded-xl shadow-lg flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/40 bg-rose-50 flex items-center justify-center">${photoTag(13)}</div>
+                            <div>
+                                <p class="font-script text-xl text-rose-100 leading-none">You are my home</p>
+                                <p class="font-serif-display italic text-[11px] text-amber-200/90 mt-1">
+                                    ${stats.totalDays.toLocaleString('id-ID')} Days & Forever ♥
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+
+                /* 18. BACK COVER */
+                case 18:
+                default:
+                    return `
+                    <div class="w-full h-full bg-maroon-cover text-white p-6 flex flex-col items-center justify-between relative">
+                        <div class="absolute inset-3 border border-amber-200/20 rounded-lg pointer-events-none"></div>
+                        <div class="mt-4">${renderButterflySVG("#fce7ec", 22)}</div>
+
+                        <div class="text-center z-10 px-2">
+                            <p class="font-script text-3xl sm:text-4xl text-rose-100 leading-tight">
+                                ${escapeHtml(appData.coverTitle)}
+                            </p>
+                            <div class="w-16 h-[1px] bg-rose-200/35 mx-auto my-4"></div>
+                            <p class="font-cormorant italic text-xs text-rose-200/80">
+                                Since ${escapeHtml(stats.formattedDate)}
+                            </p>
+                        </div>
+
+                        <p class="text-[9px] tracking-[0.25em] uppercase text-rose-200/55 mb-2">Forever & Always</p>
+                    </div>`;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        /* ============================================================================
+6. RENDER STAGE BUKU (RESPONSIF 100dvh HP & DESKTOP)
+           ============================================================================ */
+        function calculateBookDimensions() {
+            const viewport = document.getElementById('bookViewport');
+            const vw = viewport.clientWidth;
+            const vh = viewport.clientHeight;
+            isMobileView = vw <= 768;
+
+            let pageW, pageH;
+            if (isMobileView) {
+                pageW = Math.min(vw - 44, 370);
+                pageH = Math.min(vh - 20, pageW * 1.44);
+                if (pageH / 1.44 < pageW) pageW = pageH / 1.44;
+            } else {
+                const maxSpreadW = vw - 165;
+                pageH = Math.min(vh - 28, 535);
+                pageW = Math.min(maxSpreadW / 2, pageH * 0.72);
+                pageH = pageW / 0.72;
+            }
+
+            document.documentElement.style.setProperty('--page-w', `${Math.floor(pageW)}px`);
+            document.documentElement.style.setProperty('--page-h', `${Math.floor(pageH)}px`);
+        }
+
+        function renderBook(direction = null) {
+            calculateBookDimensions();
+            document.getElementById('headerBookTitle').textContent = appData.coverTitle;
+            updateLiveCountersUI();
+            updateMusicUI();
+
+            const stage = document.getElementById('bookStage');
+            const animClass = direction === 'next' ? 'flip-anim-next' : (direction === 'prev' ? 'flip-anim-prev' : '');
+
+            const tabsHTML = `
+                <div class="side-tabs">
+                    <div onclick="goToPage(1)" title="Cover" class="side-tab-item bg-[#5c131d]">Cover</div>
+                    <div onclick="goToPage(2)" title="Days Together" class="side-tab-item bg-[#8c2736]">Days</div>
+                    <div onclick="goToPage(4)" title="Photos" class="side-tab-item bg-[#b04a5a]">Photos</div>
+                    <div onclick="goToPage(8)" title="Letter" class="side-tab-item bg-[#c97a86]">Letter</div>
+                    <div onclick="goToPage(11)" title="Love Maze" class="side-tab-item bg-[#7c1f2c]">Maze</div>
+                    <div onclick="goToPage(13)" title="3 Songs" class="side-tab-item bg-[#611520]">Music</div>
+                    <div onclick="goToPage(18)" title="End" class="side-tab-item bg-[#450d15]">End</div>
+                </div>
+            `;
+
+            const spiralRingsHTML = Array.from({ length: 13 }).map(() => `<div class="spiral-ring"></div>`).join('');
+
+            if (isMobileView) {
+                stage.innerHTML = `
+                    <div class="relative flex items-center">
+                        <div class="spiral-binder -left-3">${spiralRingsHTML}</div>
+                        <div class="page-sheet page-right ${animClass}" onclick="handlePageTap(event)">
+                            ${getPageHTML(currentPage)}
+                            ${currentPage < TOTAL_PAGES ? '<div class="page-corner-hint"></div>' : ''}
+                        </div>
+                        ${tabsHTML}
+                    </div>
+                `;
+            } else {
+                if (currentPage === 1) {
+                    stage.innerHTML = `
+                        <div class="relative flex items-center">
+                            <div class="spiral-binder -left-3">${spiralRingsHTML}</div>
+                            <div class="page-sheet page-right ${animClass}" onclick="nextPage()">
+                                ${getPageHTML(1)}
+                                <div class="page-corner-hint"></div>
+                            </div>
+                            ${tabsHTML}
+                        </div>
+                    `;
+                } else if (currentPage === TOTAL_PAGES) {
+                    stage.innerHTML = `
+                        <div class="relative flex items-center">
+                            <div class="page-sheet page-left ${animClass}" onclick="prevPage()">
+                                ${getPageHTML(18)}
+                            </div>
+                            <div class="spiral-binder -right-3">${spiralRingsHTML}</div>
+                        </div>
+                    `;
+                } else {
+                    const leftNum = currentPage % 2 === 0 ? currentPage : currentPage - 1;
+                    const rightNum = leftNum + 1;
+                    currentPage = leftNum;
+
+                    stage.innerHTML = `
+                        <div class="relative flex items-center">
+                            <div class="page-sheet page-left ${direction === 'prev' ? 'flip-anim-prev' : ''}" onclick="prevPage()">
+                                ${getPageHTML(leftNum)}
+                            </div>
+
+                            <div class="spiral-binder left-1/2 -translate-x-1/2">${spiralRingsHTML}</div>
+
+                            <div class="page-sheet page-right ${direction === 'next' ? 'flip-anim-next' : ''}" onclick="nextPage()">
+                                ${getPageHTML(rightNum)}
+                                <div class="page-corner-hint"></div>
+                            </div>
+
+                            ${tabsHTML}
+                        </div>
+                    `;
+                }
+            }
+
+            updateNavigationUI();
+            setTimeout(setupMazeCanvasIfVisible, 30);
+        }
+
+        function updateNavigationUI() {
+            const indicator = document.getElementById('pageIndicator');
+            const slider = document.getElementById('pageSlider');
+            const btnPrevSide = document.getElementById('btnPrevSide');
+            const btnNextSide = document.getElementById('btnNextSide');
+            const btnPrevBottom = document.getElementById('btnPrevBottom');
+            const btnNextBottom = document.getElementById('btnNextBottom');
+
+            if (!isMobileView && currentPage > 1 && currentPage < TOTAL_PAGES) {
+                indicator.textContent = `Page ${currentPage}–${currentPage + 1} / ${TOTAL_PAGES}`;
+            } else {
+                indicator.textContent = `Page ${currentPage} / ${TOTAL_PAGES}`;
+            }
+
+            slider.value = currentPage;
+
+            const isFirst = currentPage <= 1;
+            const isLast = currentPage >= TOTAL_PAGES;
+
+            btnPrevSide.disabled = isFirst;
+            btnPrevBottom.disabled = isFirst;
+            btnNextSide.disabled = isLast;
+            btnNextBottom.disabled = isLast;
+        }
+
+        /* ============================================================================
+7. NAVIGASI HALAMAN (KLIK, KEYBOARD, & TOUCH SWIPE HP)
+           ============================================================================ */
+        function nextPage() {
+            if (currentPage >= TOTAL_PAGES) return;
+            playPaperFlipSound();
+            if (isMobileView) {
+                currentPage++;
+            } else {
+                if (currentPage === 1) currentPage = 2;
+                else if (currentPage >= 16) currentPage = 18;
+                else currentPage += 2;
+            }
+            renderBook('next');
+        }
+
+        function prevPage() {
+            if (currentPage <= 1) return;
+            playPaperFlipSound();
+            if (isMobileView) {
+                currentPage--;
+            } else {
+                if (currentPage === 18) currentPage = 16;
+                else if (currentPage <= 2) currentPage = 1;
+                else currentPage -= 2;
+            }
+            renderBook('prev');
+        }
+
+        function goToPage(target) {
+            target = Math.max(1, Math.min(TOTAL_PAGES, target));
+            if (target === currentPage) return;
+            const dir = target > currentPage ? 'next' : 'prev';
+            playPaperFlipSound();
+            currentPage = target;
+            renderBook(dir);
+        }
+
+        function handlePageTap(e) {
+            if (e.target.closest('button') || e.target.id === 'mazeCanvas') return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            if (clickX < rect.width * 0.3) prevPage();
+            else nextPage();
+        }
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.getElementById('bookViewport').addEventListener('touchstart', (e) => {
+            if (e.target.id === 'mazeCanvas') return;
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.getElementById('bookViewport').addEventListener('touchend', (e) => {
+            if (e.target.id === 'mazeCanvas') return;
+            const dx = e.changedTouches[0].screenX - touchStartX;
+            const dy = e.changedTouches[0].screenY - touchStartY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                if (dx < 0) nextPage();
+                else prevPage();
+            }
+        }, { passive: true });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('editModal').classList.contains('flex')) return;
+            if (document.getElementById('photoAdjustModal').classList.contains('flex')) return;
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+        });
+
+        window.addEventListener('resize', () => renderBook());
+
+        /* ============================================================================
+8. PERMAINAN MINI INTERAKTIF "LOVE MAZE"
+           ============================================================================ */
+        function setupMazeCanvasIfVisible() {
+            const canvas = document.getElementById('mazeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            redrawMaze(ctx, canvas);
+
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: ((clientX - rect.left) / rect.width) * canvas.width,
+                    y: ((clientY - rect.top) / rect.height) * canvas.height
+                };
+            };
+
+            const startDraw = (e) => {
+                e.stopPropagation();
+                isDrawingMaze = true;
+                mazePaths.push([getPos(e)]);
+            };
+
+            const moveDraw = (e) => {
+                if (!isDrawingMaze) return;
+                e.preventDefault();
+                e.stopPropagation();
+                mazePaths[mazePaths.length - 1].push(getPos(e));
+                redrawMaze(ctx, canvas);
+            };
+
+            const endDraw = () => { isDrawingMaze = false; };
+
+            canvas.onmousedown = startDraw;
+            canvas.onmousemove = moveDraw;
+            window.addEventListener('mouseup', endDraw);
+
+            canvas.ontouchstart = startDraw;
+            canvas.ontouchmove = moveDraw;
+            canvas.ontouchend = endDraw;
+        }
+
+        function redrawMaze(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#c92a42';
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            mazePaths.forEach(stroke => {
+                if (stroke.length < 2) return;
+                ctx.beginPath();
+                ctx.moveTo(stroke[0].x, stroke[0].y);
+                for (let i = 1; i < stroke.length; i++) {
+                    ctx.lineTo(stroke[i].x, stroke[i].y);
+                }
+                ctx.stroke();
+            });
+        }
+
+        function clearMazeCanvas(e) {
+            if (e) e.stopPropagation();
+            mazePaths = [];
+            const canvas = document.getElementById('mazeCanvas');
+            if (canvas) {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        /* ============================================================================
+9. MODAL EDIT & PENYESUAIAN BINGKAI FOTO (FIT / ZOOM / POSITION)
+           ============================================================================ */
+        let tempPhotos = [];
+        let tempPhotoAdjustments = [];
+        let tempSongs = [];
+        let activeAdjustIdx = 0;
+        let activeAdjustFit = 'contain';
+
+        function switchEditTab(tab) {
+            const tabs = ['general', 'photos', 'songs', 'security'];
+            tabs.forEach(t => {
+                const panel = document.getElementById(`tabPanel${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (t === tab) {
+                    panel.classList.remove('hidden');
+                    btn.className = "px-3.5 py-2 rounded-t-lg bg-[#5c131d] text-white transition cursor-pointer shrink-0";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "px-3.5 py-2 rounded-t-lg bg-white/70 text-[#5c131d] hover:bg-white transition cursor-pointer shrink-0";
+                }
+            });
+        }
+
+        function openEditModal() {
+            if (!isCreatorAuthenticated) {
+                triggerCreatorUnlockPrompt();
+                return;
+            }
+            document.getElementById('inpAnniversaryDate').value = appData.anniversaryDate;
+            document.getElementById('inpCoupleName').value = appData.coupleName;
+            document.getElementById('inpCoverTitle').value = appData.coverTitle;
+            document.getElementById('inpLetterTitle').value = appData.letterTitle;
+            document.getElementById('inpLetterBody').value = appData.letterBody;
+
+            previewAnniversaryStats();
+
+            tempPhotos = [...appData.photos];
+            tempPhotoAdjustments = normalizePhotoAdjustments(appData.photoAdjustments);
+            tempSongs = JSON.parse(JSON.stringify(appData.songs));
+
+            renderPhotoSlots();
+            renderSongSlots();
+            switchEditTab('general');
+
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function previewAnniversaryStats() {
+            const val = document.getElementById('inpAnniversaryDate').value;
+            if (!val) return;
+            const prevStart = parseAnniversaryDate(val);
+            const now = new Date();
+            const diffDays = Math.floor(Math.abs(now - prevStart) / (1000 * 60 * 60 * 24));
+            document.getElementById('anniversaryPreviewText').textContent =
+                `Otomatis terhitung: ${diffDays.toLocaleString('id-ID')} hari kebersamaan sampai hari ini!`;
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderPhotoSlots() {
+            const grid = document.getElementById('photoSlotsGrid');
+            const labels = [
+                "Foto 1 (Sampul)", "Foto 2 (Strip 1)", "Foto 3 (Strip 2)", "Foto 4 (Strip 3)",
+                "Foto 5 (Grid 1)", "Foto 6 (Grid 2)", "Foto 7 (Grid 3)", "Foto 8 (Grid 4)",
+                "Foto 9 (Hati)", "Foto 10 (Kolase)", "Foto 11 (Hari Bersama)", "Foto 12 (Keychain/Lagu)",
+                "Foto 13 (Film/Pita)", "Foto 14 (My Home)"
+            ];
+
+            grid.innerHTML = tempPhotos.map((src, idx) => {
+                const adj = tempPhotoAdjustments[idx] || { x: 50, y: 50, zoom: 1, fit: 'contain' };
+                const fitMode = adj.fit === 'cover' ? 'cover' : 'contain';
+                const imgStyle = `object-fit:${fitMode}; object-position:${adj.x}% ${adj.y}%; transform:scale(${adj.zoom}); transform-origin:${adj.x}% ${adj.y}%;`;
+                return `
+                <div class="rounded-xl overflow-hidden border border-rose-900/20 bg-white shadow-xs flex flex-col">
+                    <div class="relative aspect-square overflow-hidden bg-rose-100/70 flex items-center justify-center">
+                        <img src="${src}" style="${imgStyle}" class="w-full h-full">
+                        <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/60 text-white text-[9px] font-semibold">
+                            ${labels[idx] || `Foto ${idx + 1}`}
+                        </span>
+                    </div>
+                    <div class="p-1.5 grid grid-cols-2 gap-1 bg-rose-50/70 border-t border-rose-900/10">
+                        <label class="py-1 px-1.5 rounded-lg bg-[#5c131d] hover:bg-[#7c1f2c] text-white text-[10px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition">
+                            <i class="fa-solid fa-camera text-[9px]"></i>
+                            <span>Ganti</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event, ${idx})">
+                        </label>
+                        <button type="button" onclick="openPhotoAdjustModal(${idx})" class="py-1 px-1.5 rounded-lg bg-white hover:bg-rose-100 text-[#5c131d] border border-rose-900/20 text-[10px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition">
+                            <i class="fa-solid fa-crop-simple text-[9px]"></i>
+                            <span>Atur Bingkai</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function handlePhotoUpload(event, idx) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 640;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = (h * maxDim) / w; w = maxDim; }
+                        else { w = (w * maxDim) / h; h = maxDim; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    tempPhotos[idx] = canvas.toDataURL('image/jpeg', 0.8);
+                    tempPhotoAdjustments[idx] = { x: 50, y: 50, zoom: 1, fit: 'contain' };
+                    renderPhotoSlots();
+                    openPhotoAdjustModal(idx);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* Kontrol Modal Penyesuaian Bingkai Foto */
+        function openPhotoAdjustModal(idx) {
+            activeAdjustIdx = idx;
+            const adj = tempPhotoAdjustments[idx] || { x: 50, y: 50, zoom: 1, fit: 'contain' };
+            activeAdjustFit = adj.fit === 'cover' ? 'cover' : 'contain';
+
+            document.getElementById('adjustModalTitle').textContent = `Atur Bingkai — Foto #${idx + 1}`;
+            document.getElementById('adjustPreviewImg').src = tempPhotos[idx];
+            document.getElementById('rngAdjustZoom').value = adj.zoom;
+            document.getElementById('rngAdjustX').value = adj.x;
+            document.getElementById('rngAdjustY').value = adj.y;
+
+            updateFitButtonsUI();
+            updatePhotoAdjustPreview();
+
+            const modal = document.getElementById('photoAdjustModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePhotoAdjustModal() {
+            const modal = document.getElementById('photoAdjustModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function setAdjustFitMode(mode) {
+            activeAdjustFit = mode === 'cover' ? 'cover' : 'contain';
+            updateFitButtonsUI();
+            updatePhotoAdjustPreview();
+        }
+
+        function updateFitButtonsUI() {
+            const btnCover = document.getElementById('btnFitCover');
+            const btnContain = document.getElementById('btnFitContain');
+            if (activeAdjustFit === 'cover') {
+                btnCover.className = "py-1.5 px-2 rounded-lg text-xs font-semibold border border-[#5c131d] bg-[#5c131d] text-white transition cursor-pointer";
+                btnContain.className = "py-1.5 px-2 rounded-lg text-xs font-semibold border border-rose-900/25 bg-white text-[#5c131d] transition cursor-pointer";
+            } else {
+                btnContain.className = "py-1.5 px-2 rounded-lg text-xs font-semibold border border-[#5c131d] bg-[#5c131d] text-white transition cursor-pointer";
+                btnCover.className = "py-1.5 px-2 rounded-lg text-xs font-semibold border border-rose-900/25 bg-white text-[#5c131d] transition cursor-pointer";
+            }
+        }
+
+        function updatePhotoAdjustPreview() {
+            const zoom = parseFloat(document.getElementById('rngAdjustZoom').value) || 1;
+            const x = parseInt(document.getElementById('rngAdjustX').value, 10);
+            const y = parseInt(document.getElementById('rngAdjustY').value, 10);
+
+            document.getElementById('lblAdjustZoom').textContent = `${zoom.toFixed(2)}x`;
+            document.getElementById('lblAdjustX').textContent = `${x}%`;
+            document.getElementById('lblAdjustY').textContent = `${y}%`;
+
+            const img = document.getElementById('adjustPreviewImg');
+            img.style.objectFit = activeAdjustFit;
+            img.style.objectPosition = `${x}% ${y}%`;
+            img.style.transform = `scale(${zoom})`;
+            img.style.transformOrigin = `${x}% ${y}%`;
+        }
+
+        function resetSinglePhotoAdjust() {
+            activeAdjustFit = 'contain';
+            document.getElementById('rngAdjustZoom').value = 1;
+            document.getElementById('rngAdjustX').value = 50;
+            document.getElementById('rngAdjustY').value = 50;
+            updateFitButtonsUI();
+            updatePhotoAdjustPreview();
+        }
+
+        function applyPhotoAdjust() {
+            const zoom = parseFloat(document.getElementById('rngAdjustZoom').value) || 1;
+            const x = parseInt(document.getElementById('rngAdjustX').value, 10);
+            const y = parseInt(document.getElementById('rngAdjustY').value, 10);
+
+            tempPhotoAdjustments[activeAdjustIdx] = {
+                x,
+                y,
+                zoom,
+                fit: activeAdjustFit
+            };
+            renderPhotoSlots();
+            closePhotoAdjustModal();
+            showToast(`Bingkai Foto #${activeAdjustIdx + 1} disesuaikan!`);
+        }
+
+        function renderSongSlots() {
+            const container = document.getElementById('songSlotsContainer');
+            container.innerHTML = tempSongs.map((song, idx) => `
+                <div class="p-3 rounded-xl bg-rose-50/90 border border-rose-900/15 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-[#5c131d]">Lagu #${idx + 1}</span>
+                        <span class="text-[10px] text-rose-800">${song.customName ? `File: ${escapeHtml(song.customName)}` : 'Melodi Bawaan'}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input id="inpSongTitle_${idx}" type="text" value="${escapeHtml(song.title)}"
+                            class="w-full px-2.5 py-1.5 rounded-lg border border-rose-900/20 bg-white text-xs focus:outline-none" placeholder="Judul Lagu ${idx + 1}">
+                        <input id="inpSongArtist_${idx}" type="text" value="${escapeHtml(song.artist)}"
+                            class="w-full px-2.5 py-1.5 rounded-lg border border-rose-900/20 bg-white text-xs focus:outline-none" placeholder="Penyanyi">
+                    </div>
+                    <div>
+                        <input type="file" accept="audio/*" onchange="handleSongFileUpload(event, ${idx})"
+                            class="w-full text-[11px] text-stone-700 file:mr-2.5 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:font-semibold file:bg-[#5c131d] file:text-white hover:file:bg-[#7c1f2c] cursor-pointer">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleSongFileUpload(event, idx) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            sessionAudioUrls[idx] = url;
+            tempSongs[idx].customName = file.name;
+            tempSongs[idx].title = document.getElementById(`inpSongTitle_${idx}`).value.trim() || file.name.replace(/\.[^/.]+$/, "");
+            tempSongs[idx].artist = document.getElementById(`inpSongArtist_${idx}`).value.trim() || "Our Song";
+            renderSongSlots();
+        }
+
+        function saveCustomization() {
+            if (!isCreatorAuthenticated) return;
+            appData.anniversaryDate = document.getElementById('inpAnniversaryDate').value || DEFAULT_DATA.anniversaryDate;
+            appData.coupleName = document.getElementById('inpCoupleName').value.trim() || DEFAULT_DATA.coupleName;
+            appData.coverTitle = document.getElementById('inpCoverTitle').value.trim() || DEFAULT_DATA.coverTitle;
+            appData.letterTitle = document.getElementById('inpLetterTitle').value.trim() || DEFAULT_DATA.letterTitle;
+            appData.letterBody = document.getElementById('inpLetterBody').value.trim() || DEFAULT_DATA.letterBody;
+
+            for (let i = 0; i < 3; i++) {
+                const tEl = document.getElementById(`inpSongTitle_${i}`);
+                const aEl = document.getElementById(`inpSongArtist_${i}`);
+                if (tEl) tempSongs[i].title = tEl.value.trim() || DEFAULT_SONGS[i].title;
+                if (aEl) tempSongs[i].artist = aEl.value.trim() || DEFAULT_SONGS[i].artist;
+            }
+
+            appData.songs = tempSongs;
+            appData.photos = [...tempPhotos];
+            appData.photoAdjustments = normalizePhotoAdjustments(tempPhotoAdjustments);
+
+            saveAppDataToStorage();
+            closeEditModal();
+            renderBook();
+            showToast("Semua perubahan berhasil disimpan!");
+        }
+
+        async function exportLockedHTML() {
+            if (!isCreatorAuthenticated) return;
+            saveCustomization();
+
+            let pinHash = getActivePinHash();
+            if (!pinHash) {
+                pinHash = computePinHash("1234");
+                localStorage.setItem('romantic_scrapbook_pin_hash', pinHash);
+            }
+
+            const exportSongs = await Promise.all(appData.songs.map(async (song, idx) => {
+                const copy = { title: song.title, artist: song.artist, customName: song.customName || "", embeddedAudioDataUrl: song.embeddedAudioDataUrl || null };
+                if (sessionAudioUrls[idx] && sessionAudioUrls[idx].startsWith('blob:')) {
+                    try {
+                        const resp = await fetch(sessionAudioUrls[idx]);
+                        const blob = await resp.blob();
+                        if (blob.size <= 4 * 1024 * 1024) {
+                            copy.embeddedAudioDataUrl = await new Promise((resolve) => {
+                                const r = new FileReader();
+                                r.onloadend = () => resolve(r.result);
+                                r.readAsDataURL(blob);
+                            });
+                        }
+                    } catch (e) {}
+                }
+                return copy;
+            }));
+
+            const payloadData = {
+                ...appData,
+                songs: exportSongs
+            };
+
+            let fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            fullHtml = fullHtml.replace(/const IS_LOCKED_FOR_RECIPIENT = (true|false);/, "const IS_LOCKED_FOR_RECIPIENT = true;");
+            fullHtml = fullHtml.replace(/const EMBEDDED_CREATOR_PIN_HASH = "[^"]*";/, `const EMBEDDED_CREATOR_PIN_HASH = ${JSON.stringify(pinHash)};`);
+            fullHtml = fullHtml.replace(/const EMBEDDED_CUSTOM_DATA = (null|\{[\s\S]*?\});/, `const EMBEDDED_CUSTOM_DATA = ${JSON.stringify(payloadData)};`);
+
+            const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "scrapbook-kita.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("🔒 File scrapbook-kita.html terkunci berhasil diunduh!");
+        }
+
+        function resetToDefault() {
+            if (!isCreatorAuthenticated) return;
+            if (isMusicPlaying) stopRomanticMusic();
+            sessionAudioUrls = [null, null, null];
+            appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+            localStorage.removeItem('romantic_scrapbook_v3');
+            openEditModal();
+            renderBook();
+            showToast("Dikembalikan ke contoh bawaan.");
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+                document.getElementById('iconFullscreen').className = 'fa-solid fa-compress text-xs';
+            } else {
+                document.exitFullscreen().catch(() => {});
+                document.getElementById('iconFullscreen').className = 'fa-solid fa-expand text-xs';
+            }
+        }
+
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            isCreatorAuthenticated = false;
+            updateCreatorToolbarVisibility();
+            renderBook();
+            setInterval(updateLiveCountersUI, 1000);
+
+            if (urlParams.get('admin') === '1') {
+                setTimeout(() => triggerCreatorUnlockPrompt(), 250);
+            }
+        };
+    </script>
+</body>
+</html>
